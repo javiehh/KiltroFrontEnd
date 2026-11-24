@@ -33,16 +33,6 @@ export function filtrarProductos(productos, { texto = '', categoriaId = '', solo
   return [...resultado].sort(orden_);
 }
 
-/**
- * Convierte la URL de imagen del formulario en el "media" del producto:
- * con URL → foto; sin URL → se conserva el ícono actual o se usa el de por defecto.
- */
-export function mediaDesdeFormulario(imagenUrl, nombre, mediaActual) {
-  if (imagenUrl) return { tipo: 'foto', url: imagenUrl, alt: nombre };
-  if (mediaActual && mediaActual.tipo === 'icono') return mediaActual;
-  return { tipo: 'icono', icono: 'huellas', tile: '#D9A441' };
-}
-
 /** Datos de un producto convertidos a los valores (texto) que espera ProductForm. */
 export function productoAFormulario(p) {
   return {

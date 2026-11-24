@@ -1,14 +1,13 @@
 import { useSearchParams } from 'react-router-dom';
-import { categoriasRepo, productosRepo } from '../../data/db.js';
 import { filtrarProductos } from '../../data/productos.js';
-import { useCollection } from '../../hooks/useCollection.js';
+import { useCatalogo } from '../../hooks/useCatalogo.js';
+import ConEstado from '../../components/common/ConEstado.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import ProductGrid from '../../components/common/ProductGrid.jsx';
 
 /** Catálogo completo con filtros combinables: texto (también desde el buscador del navbar), categoría, ofertas y orden. */
 export default function ProductsPage() {
-  const productos = useCollection(productosRepo);
-  const categorias = useCollection(categoriasRepo);
+  const { productos, categorias, cargado, cargando, error, recargar } = useCatalogo();
   const [params, setParams] = useSearchParams();
 
   const texto = params.get('q') || '';
@@ -55,8 +54,14 @@ export default function ProductsPage() {
             </div>
           </div>
         </div>
-        <p className="text-secondary small" aria-live="polite" data-testid="resultados">{resultado.length} producto(s) encontrados</p>
-        <ProductGrid productos={resultado} mensajeVacio="No encontramos productos con esos filtros." />
+        <ConEstado listo={cargado} cargando={cargando} error={error} onReintentar={recargar}>
+          {() => (
+            <>
+              <p className="text-secondary small" aria-live="polite" data-testid="resultados">{resultado.length} producto(s) encontrados</p>
+              <ProductGrid productos={resultado} categorias={categorias} mensajeVacio="No encontramos productos con esos filtros." />
+            </>
+          )}
+        </ConEstado>
       </div>
     </>
   );

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ordenesRepo } from '../../data/db.js';
+import { Link, useNavigate } from 'react-router-dom';
+import { comprar } from '../../api/boletasApi.js';
+import { invalidarCatalogo } from '../../api/catalogo.js';
+import { mensajeDeError } from '../../api/errores.js';
 import { vaciarCarrito } from '../../data/carrito.js';
-import { crearOrden, procesarPago, reintentarOrden, validarStock } from '../../data/ordenes.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../hooks/useCart.js';
 import { useForm } from '../../hooks/useForm.js';
@@ -26,47 +27,54 @@ const REGLAS = {
   indicaciones: [(v) => largoMaximo(v, 300)]
 };
 
-/** Valores iniciales: si es un reintento, los datos de la orden; si hay sesión, los datos del usuario (se completan solos). */
-function valoresIniciales(usuario, ordenPrevia) {
-  if (ordenPrevia) {
-    const { cliente, direccion } = ordenPrevia;
-    return { ...cliente, calle: direccion.calle, departamento: direccion.departamento || '', region: direccion.region, comuna: direccion.comuna, indicaciones: direccion.indicaciones || '', simulacion: 'aprobado' };
-  }
-  return {
-    nombre: usuario?.nombre ?? '', apellidos: usuario?.apellidos ?? '', correo: usuario?.correo ?? '',
-    calle: usuario?.direccion ?? '', departamento: '', region: usuario?.region ?? '', comuna: usuario?.comuna ?? '', indicaciones: '',
-    simulacion: 'aprobado'
-  };
-}
+/** Si hay sesión, los datos del usuario se completan solos. */
+const valoresIniciales = (usuario) => ({
+  nombre: usuario?.nombre ?? '', apellidos: usuario?.apellidos ?? '', correo: usuario?.correo ?? '',
+  calle: usuario?.direccion ?? '', departamento: '', region: usuario?.region ?? '', comuna: usuario?.comuna ?? '', indicaciones: ''
+});
 
 export default function CheckoutPage() {
   const { detalle, total } = useCart();
   const { usuario } = useAuth();
   const navigate = useNavigate();
-  const { state } = useLocation();
-  const ordenPrevia = state?.reintento ? ordenesRepo.obtener(state.reintento) : null;
   const [problemas, setProblemas] = useState([]);
-  const form = useForm(valoresIniciales(usuario, ordenPrevia), REGLAS);
+  const [enviando, setEnviando] = useState(false);
+  const form = useForm(valoresIniciales(usuario), REGLAS);
 
   if (detalle.length === 0) {
     return <div className="container py-5"><EmptyState mensaje="No hay productos en tu carrito para pagar."><Link to="/productos" className="btn btn-primary">Ver productos</Link></EmptyState></div>;
   }
 
-  const pagar = (v) => {
-    const sinStock = validarStock(detalle);
+  const pagar = async (v) => {
+    // revisión rápida para avisar antes de enviar; el servidor vuelve a comprobar el stock y es quien decide
+    const sinStock = detalle
+      .filter(({ producto, cantidad }) => cantidad > producto.stock)
+      .map(({ producto }) => `No hay stock suficiente de "${producto.nombre}" (quedan ${producto.stock}).`);
     if (sinStock.length) { setProblemas(sinStock); return; }
-    const datos = {
-      cliente: { nombre: v.nombre.trim(), apellidos: v.apellidos.trim(), correo: v.correo.trim() },
-      direccion: { calle: v.calle.trim(), departamento: v.departamento.trim(), region: v.region, comuna: v.comuna, indicaciones: v.indicaciones.trim() },
-      lineas: detalle
-    };
-    const orden = ordenPrevia ? reintentarOrden(ordenPrevia.numero, datos) : crearOrden({ ...datos, usuarioRun: usuario?.run ?? null });
-    const resultado = procesarPago(orden.numero, v.simulacion === 'aprobado');
-    if (resultado.estado === 'pagada') {
+
+    setProblemas([]);
+    setEnviando(true);
+    try {
+      // solo viajan los datos del cliente y productoId + cantidad: el precio y el total los calcula el backend
+      const orden = await comprar({
+        cliente: { nombre: v.nombre.trim(), apellidos: v.apellidos.trim(), correo: v.correo.trim() },
+        direccion: { calle: v.calle.trim(), departamento: v.departamento.trim(), region: v.region, comuna: v.comuna, indicaciones: v.indicaciones.trim() },
+        lineas: detalle
+      });
       vaciarCarrito();
-      navigate(`/compra/exitosa/${orden.numero}`);
-    } else {
-      navigate(`/compra/error/${orden.numero}`);
+      invalidarCatalogo(); // el stock cambió
+      navigate(`/compra/exitosa/${orden.id}`, { state: { orden } });
+    } catch (error) {
+      const status = error.response?.status;
+      if (!error.response || status === 409 || status === 503) {
+        // sin stock (409), servicio caído (503) o sin conexión: vista de compra fallida; el carrito se conserva
+        invalidarCatalogo();
+        navigate('/compra/error', { state: { motivo: mensajeDeError(error) } });
+      } else {
+        setProblemas([mensajeDeError(error)]);
+      }
+    } finally {
+      setEnviando(false);
     }
   };
 
@@ -75,7 +83,9 @@ export default function CheckoutPage() {
       <PageHeader titulo="Checkout" subtitulo="Completa tus datos y la dirección de entrega." >
         <span className="badge text-bg-primary fs-6">Total a pagar: {formatoCLP(total)}</span>
       </PageHeader>
-      {usuario && <div className="alert alert-info py-2">Ya iniciaste sesión: completamos tus datos automáticamente.</div>}
+      {usuario
+        ? <div className="alert alert-info py-2">Ya iniciaste sesión: completamos tus datos automáticamente.</div>
+        : <div className="alert alert-secondary py-2">Estás comprando sin iniciar sesión: la compra se registra, pero no quedará en tu historial. <Link to="/login">Inicia sesión</Link> para verla después.</div>}
 
       <div className="table-responsive mb-4">
         <table className="table table-sm align-middle" aria-label="Resumen de la compra">
@@ -103,15 +113,8 @@ export default function CheckoutPage() {
           <FormField as="textarea" label="Indicaciones para la entrega (opcional)" className="col-12 mb-3" placeholder="Ej: Entre calles, color del edificio, no tiene timbre." {...form.campo('indicaciones')} />
         </div>
 
-        <div className="border rounded p-3 mb-3 bg-body-tertiary">
-          <FormField as="select" label="Simulación de la pasarela de pago (solo demostración)" className="mb-0" hint="Como no hay una pasarela real, aquí eliges si el pago se aprueba o se rechaza." {...form.campo('simulacion')}>
-            <option value="aprobado">Pago aprobado</option>
-            <option value="rechazado">Pago rechazado</option>
-          </FormField>
-        </div>
-
         {problemas.length > 0 && <div className="alert alert-danger" role="alert">{problemas.map((p) => <div key={p}>{p}</div>)}</div>}
-        <div className="text-end"><Button type="submit" variant="success" size="lg">Pagar ahora {formatoCLP(total)}</Button></div>
+        <div className="text-end"><Button type="submit" variant="success" size="lg" disabled={enviando}>{enviando ? 'Procesando…' : `Pagar ahora ${formatoCLP(total)}`}</Button></div>
       </form>
     </div>
   );

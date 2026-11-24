@@ -1,64 +1,111 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
-import { usuariosRepo } from '../data/db.js';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ROLES } from '../data/constantes.js';
-import { useCollection } from '../hooks/useCollection.js';
+import { PERMISOS, puede } from '../permisos.js';
+import { sesion } from '../api/sesion.js';
+import { mensajeDeError } from '../api/errores.js';
+import { guardarPerfil, iniciarSesion, obtenerSesion, registrarCuenta } from '../api/authApi.js';
 
-export const SESION_KEY = 'kiltro_react_sesion';
-const AuthContext = createContext(null);
+export const AuthContext = createContext(null);
 
 /**
- * Sesión de usuario simulada: guarda el RUN del usuario conectado en localStorage.
- * El usuario se busca siempre en la "base de datos", así si el admin edita su perfil se refleja al tiro.
+ * Arma el valor que reciben los componentes. Está aparte del Provider para que las pruebas puedan
+ * entregar un usuario sin llamar a la API (ver test-utils.jsx).
  */
+export function construirValor({ usuario = null, cargando = false, sesionExpirada = false, acciones = {} } = {}) {
+  return {
+    usuario,
+    cargando,
+    sesionExpirada,
+    login: async () => ({ ok: false, error: 'No disponible' }),
+    logout: () => {},
+    registrar: async () => ({ ok: false, error: 'No disponible' }),
+    actualizarPerfil: async () => ({ ok: false, error: 'No disponible' }),
+    ...acciones,
+    estaLogueado: Boolean(usuario),
+    esAdmin: usuario?.tipo === ROLES.ADMIN,
+    esVendedor: usuario?.tipo === ROLES.VENDEDOR,
+    puedeEntrarAlPanel: puede(usuario, PERMISOS.PANEL),
+    puede: (permiso) => puede(usuario, permiso)
+  };
+}
+
 export function AuthProvider({ children }) {
-  const usuarios = useCollection(usuariosRepo);
-  const [run, setRun] = useState(() => localStorage.getItem(SESION_KEY));
+  const [usuario, setUsuario] = useState(null);
+  // si hay tokens guardados, se arranca "cargando" hasta confirmarlos con el servidor (así F5 no te manda al login)
+  const [cargando, setCargando] = useState(() => sesion.hayTokens());
+  const [sesionExpirada, setSesionExpirada] = useState(false);
 
-  const usuario = useMemo(() => usuarios.find((u) => u.run === run) || null, [usuarios, run]);
+  // Recuperar la sesión al abrir o recargar la página
+  useEffect(() => {
+    if (!sesion.hayTokens()) return undefined;
+    let activo = true;
+    obtenerSesion()
+      .then((u) => activo && setUsuario(u))
+      .catch((error) => {
+        // token rechazado por el servidor: se descarta. Si solo falló la conexión, se conserva para reintentar al recargar.
+        if (error?.response) sesion.limpiar();
+      })
+      .finally(() => activo && setCargando(false));
+    return () => {
+      activo = false;
+    };
+  }, []);
 
-  const login = useCallback((correo, password) => {
-    const encontrado = usuariosRepo
-      .listar()
-      .find((u) => u.correo.toLowerCase() === String(correo).trim().toLowerCase() && u.password === password);
-    if (!encontrado) return { ok: false, error: 'Correo o contraseña incorrectos.' };
-    localStorage.setItem(SESION_KEY, encontrado.run);
-    setRun(encontrado.run);
-    return { ok: true, usuario: encontrado };
+  // Si la renovación del token falla en cualquier petición, la sesión se cierra sola
+  useEffect(
+    () =>
+      sesion.alExpirar(() => {
+        setUsuario(null);
+        setSesionExpirada(true);
+      }),
+    []
+  );
+
+  const login = useCallback(async (correo, password) => {
+    try {
+      const { usuario: u, accessToken, refreshToken } = await iniciarSesion(correo, password);
+      sesion.guardar(accessToken, refreshToken);
+      setUsuario(u);
+      setSesionExpirada(false);
+      return { ok: true, usuario: u };
+    } catch (error) {
+      return { ok: false, error: mensajeDeError(error) };
+    }
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(SESION_KEY);
-    setRun(null);
+    sesion.limpiar();
+    setUsuario(null);
+    setSesionExpirada(false);
   }, []);
 
-  /** Registro público: siempre crea un usuario de tipo Cliente. */
-  const registrar = useCallback((datos) => {
-    if (usuariosRepo.obtener(datos.run)) return { ok: false, error: 'Ya existe una cuenta registrada con ese RUN.' };
-    if (usuariosRepo.listar().some((u) => u.correo.toLowerCase() === datos.correo.toLowerCase())) {
-      return { ok: false, error: 'Ya existe una cuenta con ese correo.' };
+  /** Siempre crea un Cliente (lo decide el servidor). */
+  const registrar = useCallback(async (datos) => {
+    try {
+      return { ok: true, usuario: await registrarCuenta(datos) };
+    } catch (error) {
+      return { ok: false, error: mensajeDeError(error) };
     }
-    const creado = usuariosRepo.crear({ ...datos, tipo: ROLES.CLIENTE });
-    return { ok: true, usuario: creado };
+  }, []);
+
+  const actualizarPerfil = useCallback(async (datos) => {
+    try {
+      const actualizado = await guardarPerfil(datos);
+      setUsuario(actualizado);
+      return { ok: true, usuario: actualizado };
+    } catch (error) {
+      return { ok: false, error: mensajeDeError(error) };
+    }
   }, []);
 
   const valor = useMemo(
-    () => ({
-      usuario,
-      login,
-      logout,
-      registrar,
-      estaLogueado: Boolean(usuario),
-      esAdmin: usuario?.tipo === ROLES.ADMIN,
-      esVendedor: usuario?.tipo === ROLES.VENDEDOR,
-      puedeEntrarAlPanel: usuario?.tipo === ROLES.ADMIN || usuario?.tipo === ROLES.VENDEDOR
-    }),
-    [usuario, login, logout, registrar]
+    () => construirValor({ usuario, cargando, sesionExpirada, acciones: { login, logout, registrar, actualizarPerfil } }),
+    [usuario, cargando, sesionExpirada, login, logout, registrar, actualizarPerfil]
   );
 
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;
 }
 
-/** Falla con un mensaje claro si se usa useAuth fuera de <AuthProvider> (función pura, fácil de probar). */
 export function exigirAuth(ctx) {
   if (!ctx) throw new Error('useAuth debe usarse dentro de <AuthProvider>');
   return ctx;

@@ -1,24 +1,32 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { categoriasRepo, productosRepo } from '../../data/db.js';
+import { obtenerProducto } from '../../api/productosApi.js';
 import { estaEnOferta, precioFinal } from '../../data/productos.js';
-import { useCollection } from '../../hooks/useCollection.js';
+import { useApi } from '../../hooks/useApi.js';
+import { useCatalogo } from '../../hooks/useCatalogo.js';
 import { formatoCLP } from '../../utils/format.js';
 import AddToCartButton from '../../components/common/AddToCartButton.jsx';
+import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import ProductGrid from '../../components/common/ProductGrid.jsx';
 import ProductMedia from '../../components/common/ProductMedia.jsx';
 import QuantitySelector from '../../components/common/QuantitySelector.jsx';
 
-export default function ProductDetailPage() {
-  const { id } = useParams();
-  const productos = useCollection(productosRepo);
-  const categorias = useCollection(categoriasRepo);
+function DetalleProducto({ id }) {
+  const consulta = useApi(() => obtenerProducto(id), [id]); // GET /productos/{id}: el stock mostrado es el real
+  const { productos, categorias } = useCatalogo();
   const [cantidad, setCantidad] = useState(1);
+  const producto = consulta.datos;
 
-  const producto = productos.find((p) => String(p.id) === id);
+  if (consulta.cargando && !producto) return <div className="container py-5"><Cargando /></div>;
   if (!producto) {
-    return <div className="container py-5"><EmptyState mensaje="No encontramos ese producto."><Link to="/productos" className="btn btn-primary">Volver al catálogo</Link></EmptyState></div>;
+    return (
+      <div className="container py-5">
+        <EmptyState mensaje={consulta.error || 'No encontramos ese producto.'}>
+          <Link to="/productos" className="btn btn-primary">Volver al catálogo</Link>
+        </EmptyState>
+      </div>
+    );
   }
 
   const categoria = categorias.find((c) => c.id === producto.categoriaId);
@@ -29,14 +37,14 @@ export default function ProductDetailPage() {
     <div className="container py-4">
       <nav aria-label="breadcrumb"><ol className="breadcrumb">
         <li className="breadcrumb-item"><Link to="/">Home</Link></li>
-        {categoria && <li className="breadcrumb-item"><Link to={`/categorias/${categoria.id}`}>{categoria.nombre}</Link></li>}
+        <li className="breadcrumb-item"><Link to={`/categorias/${producto.categoriaId}`}>{producto.categoriaNombre}</Link></li>
         <li className="breadcrumb-item active" aria-current="page">{producto.nombre}</li>
       </ol></nav>
 
       <div className="row g-4 mb-5">
         <div className="col-md-6"><div className="rounded overflow-hidden shadow-sm"><ProductMedia producto={producto} className="kiltro-media--grande" /></div></div>
         <div className="col-md-6">
-          {categoria && <span className="kiltro-tag">{categoria.nombre}</span>}
+          <span className="kiltro-tag">{producto.categoriaNombre}</span>
           <h1 className="kiltro-heading h2 mt-1">{producto.nombre}</h1>
           <p className="text-secondary small mb-1">Código {producto.codigo}</p>
           <div className="mb-3">
@@ -54,7 +62,13 @@ export default function ProductDetailPage() {
         </div>
       </div>
 
-      {relacionados.length > 0 && (<><h2 className="kiltro-heading h4 mb-3">También te puede interesar</h2><ProductGrid productos={relacionados} /></>)}
+      {relacionados.length > 0 && (<><h2 className="kiltro-heading h4 mb-3">También te puede interesar</h2><ProductGrid productos={relacionados} categorias={categorias} /></>)}
     </div>
   );
+}
+
+/** La "key" reinicia el componente al pasar de un producto a otro (la cantidad elegida no se arrastra). */
+export default function ProductDetailPage() {
+  const { id } = useParams();
+  return <DetalleProducto key={id} id={id} />;
 }

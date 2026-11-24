@@ -1,15 +1,22 @@
-import { productosRepo } from '../../data/db.js';
-import { productosEnOferta } from '../../data/productos.js';
-import { useCollection } from '../../hooks/useCollection.js';
+import { listarOfertas } from '../../api/productosApi.js';
+import { useApi } from '../../hooks/useApi.js';
+import { useCatalogo } from '../../hooks/useCatalogo.js';
+import ConEstado from '../../components/common/ConEstado.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import ProductGrid from '../../components/common/ProductGrid.jsx';
 
+/** Usa el endpoint GET /productos/ofertas de ms-productos: el servidor decide qué productos tienen descuento. */
 export default function OffersPage() {
-  const ofertas = productosEnOferta(useCollection(productosRepo));
+  const ofertas = useApi(listarOfertas);
+  const { categorias } = useCatalogo();
   return (
     <>
       <PageHeader oscuro titulo="Ofertas" subtitulo="Todos los productos con descuento." />
-      <div className="container"><ProductGrid productos={ofertas} mensajeVacio="Por ahora no hay ofertas activas." /></div>
+      <div className="container">
+        <ConEstado listo={ofertas.datos !== null} cargando={ofertas.cargando} error={ofertas.error} onReintentar={ofertas.recargar}>
+          {() => <ProductGrid productos={ofertas.datos} categorias={categorias} mensajeVacio="Por ahora no hay ofertas activas." />}
+        </ConEstado>
+      </div>
     </>
   );
 }

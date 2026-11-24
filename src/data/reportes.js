@@ -1,24 +1,18 @@
-/** Cálculos para el dashboard y los reportes (funciones puras: reciben los datos, devuelven números). */
-import { ESTADOS_ORDEN, ROLES } from './constantes.js';
+/**
+ * Cálculos para los reportes (funciones puras: reciben los datos que entrega la API y devuelven números).
+ * Las boletas anuladas no cuentan como venta, igual que en el backend.
+ */
+import { ESTADOS_BOLETA, ROLES } from './constantes.js';
 
-const pagadas = (ordenes) => ordenes.filter((o) => o.estado === ESTADOS_ORDEN.PAGADA);
+const vigentes = (boletas) => boletas.filter((b) => b.estado !== ESTADOS_BOLETA.ANULADA);
 
-export function resumenVentas(ordenes) {
-  const ok = pagadas(ordenes);
-  const total = ok.reduce((acc, o) => acc + o.total, 0);
-  return {
-    ordenesPagadas: ok.length,
-    ordenesRechazadas: ordenes.filter((o) => o.estado === ESTADOS_ORDEN.RECHAZADA).length,
-    ventasTotales: total,
-    ticketPromedio: ok.length ? Math.round(total / ok.length) : 0
-  };
-}
+export const cantidadAnuladas = (boletas) => boletas.length - vigentes(boletas).length;
 
 /** Unidades e ingresos por producto, de mayor a menor cantidad vendida. */
-export function topProductos(ordenes, limite = 5) {
+export function topProductos(boletas, limite = 5) {
   const mapa = new Map();
-  pagadas(ordenes).forEach((o) =>
-    o.items.forEach((i) => {
+  vigentes(boletas).forEach((b) =>
+    b.items.forEach((i) => {
       const actual = mapa.get(i.productoId) || { productoId: i.productoId, nombre: i.nombre, unidades: 0, ingresos: 0 };
       actual.unidades += i.cantidad;
       actual.ingresos += i.subtotal;
@@ -28,14 +22,12 @@ export function topProductos(ordenes, limite = 5) {
   return [...mapa.values()].sort((a, b) => b.unidades - a.unidades).slice(0, limite);
 }
 
-export function ventasPorCategoria(ordenes, productos, categorias) {
+export function ventasPorCategoria(boletas, productos, categorias) {
   const porProducto = new Map(productos.map((p) => [p.id, p.categoriaId]));
+  const items = vigentes(boletas).flatMap((b) => b.items);
   return categorias.map((c) => ({
     categoria: c.nombre,
-    ingresos: pagadas(ordenes)
-      .flatMap((o) => o.items)
-      .filter((i) => porProducto.get(i.productoId) === c.id)
-      .reduce((acc, i) => acc + i.subtotal, 0)
+    ingresos: items.filter((i) => porProducto.get(i.productoId) === c.id).reduce((acc, i) => acc + i.subtotal, 0)
   }));
 }
 

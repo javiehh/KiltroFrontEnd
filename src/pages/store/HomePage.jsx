@@ -1,16 +1,15 @@
 import { Link } from 'react-router-dom';
 import { Carousel } from 'react-bootstrap';
-import { categoriasRepo, productosRepo } from '../../data/db.js';
 import { productosEnOferta } from '../../data/productos.js';
-import { useCollection } from '../../hooks/useCollection.js';
+import { useCatalogo } from '../../hooks/useCatalogo.js';
+import ConEstado from '../../components/common/ConEstado.jsx';
 import ProductGrid from '../../components/common/ProductGrid.jsx';
 import { ICONOS } from '../../data/iconos.js';
 
 const FOTO_HERO = 'https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&w=1600&q=80';
 
 export default function HomePage() {
-  const productos = useCollection(productosRepo);
-  const categorias = useCollection(categoriasRepo);
+  const { productos, categorias, cargado, cargando, error, recargar } = useCatalogo();
   const destacados = productos.slice(0, 4);
   const ofertas = productosEnOferta(productos).slice(0, 4);
 
@@ -55,6 +54,9 @@ export default function HomePage() {
         </Carousel.Item>
       </Carousel>
 
+      <ConEstado listo={cargado} cargando={cargando} error={error} onReintentar={recargar}>
+        {() => (
+          <>
       <section className="container py-5" aria-labelledby="titulo-categorias">
         <h2 id="titulo-categorias" className="kiltro-heading text-center mb-4">Categorías</h2>
         <div className="row g-3 row-cols-2 row-cols-md-4">
@@ -77,7 +79,7 @@ export default function HomePage() {
           <div><h2 id="titulo-destacados" className="kiltro-heading mb-0">Lo más pedido</h2><p className="text-secondary mb-0">Una muestra de nuestro catálogo.</p></div>
           <Link to="/productos" className="btn btn-outline-primary">Ver catálogo completo</Link>
         </div>
-        <ProductGrid productos={destacados} />
+        <ProductGrid productos={destacados} categorias={categorias} />
       </section>
 
       {ofertas.length > 0 && (
@@ -86,9 +88,13 @@ export default function HomePage() {
             <h2 id="titulo-ofertas" className="kiltro-heading mb-0">Ofertas</h2>
             <Link to="/ofertas" className="btn btn-outline-primary">Ver todas</Link>
           </div>
-          <ProductGrid productos={ofertas} />
+          <ProductGrid productos={ofertas} categorias={categorias} />
         </section>
       )}
+
+          </>
+        )}
+      </ConEstado>
 
       <section className="kiltro-about py-5">
         <div className="container col-lg-8">

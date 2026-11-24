@@ -1,36 +1,45 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { usuariosRepo } from '../../data/db.js';
-import { useCollection } from '../../hooks/useCollection.js';
+import { mensajeDeError } from '../../api/errores.js';
+import { actualizarUsuario, crearUsuario, obtenerUsuario } from '../../api/usuariosApi.js';
+import { useApi } from '../../hooks/useApi.js';
 import UserForm from '../../components/forms/UserForm.jsx';
+import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Una sola página para "Nuevo usuario" (sin :run) y "Editar usuario" (con :run). */
+/** Una sola página para "Nuevo usuario" (sin :id) y "Editar usuario" (con :id). */
 export default function UserEditorPage() {
-  const { run } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
+  const consulta = useApi(() => (id ? obtenerUsuario(id) : Promise.resolve(null)), [id]);
   const [error, setError] = useState('');
-  const usuarios = useCollection(usuariosRepo);
-  const existente = usuarios.find((u) => u.run === run);
-  if (run && !existente) return <EmptyState mensaje="No encontramos ese usuario."><Link to="/admin/usuarios" className="btn btn-primary">Volver</Link></EmptyState>;
+  const [enviando, setEnviando] = useState(false);
+  const existente = consulta.datos;
 
-  const guardar = (datos) => {
-    const correoRepetido = usuarios.some((u) => u.correo.toLowerCase() === datos.correo.toLowerCase() && u.run !== datos.run);
-    if (correoRepetido) { setError('Ya existe un usuario con ese correo.'); return; }
-    if (existente) usuariosRepo.actualizar(existente.run, datos);
-    else {
-      if (usuariosRepo.obtener(datos.run)) { setError('Ya existe un usuario con ese RUN.'); return; }
-      usuariosRepo.crear(datos);
+  if (consulta.cargando && !existente) return <Cargando />;
+  if (id && !existente) return <EmptyState mensaje={consulta.error || 'No encontramos ese usuario.'}><Link to="/admin/usuarios" className="btn btn-primary">Volver</Link></EmptyState>;
+
+  const guardar = async (datos) => {
+    setEnviando(true);
+    setError('');
+    try {
+      if (existente) await actualizarUsuario(existente.id, datos);
+      else await crearUsuario(datos);
+      navigate('/admin/usuarios');
+    } catch (e) {
+      setError(mensajeDeError(e)); // RUN o correo repetidos (409), RUN inválido (400), etc.
+    } finally {
+      setEnviando(false);
     }
-    navigate('/admin/usuarios');
   };
 
   return (
     <>
       <PageHeader titulo={existente ? `Editar usuario: ${existente.nombre} ${existente.apellidos}` : 'Nuevo usuario'} />
       <div className="card shadow-sm" style={{ maxWidth: 760 }}><div className="card-body">
-        <UserForm key={existente?.run ?? 'nuevo'} modo={existente ? 'editar' : 'crear'} inicial={existente} onSubmit={guardar} onCancel={() => navigate('/admin/usuarios')} errorGeneral={error} />
+        <UserForm key={existente?.id ?? 'nuevo'} modo={existente ? 'editar' : 'crear'} inicial={existente ?? undefined} onSubmit={guardar}
+          onCancel={() => navigate('/admin/usuarios')} errorGeneral={error} enviando={enviando} />
       </div></div>
     </>
   );

@@ -9,14 +9,14 @@ const REGLAS = {
 };
 
 /** Formulario de inicio de sesión. `errorGeneral` es el mensaje que devuelve el sistema (ej: credenciales incorrectas). */
-export default function LoginForm({ onSubmit, errorGeneral = '' }) {
+export default function LoginForm({ onSubmit, errorGeneral = '', enviando = false }) {
   const form = useForm({ correo: '', password: '' }, REGLAS);
   return (
     <form onSubmit={form.enviar(onSubmit)} noValidate aria-label="Inicio de sesión">
       <FormField label="Correo electrónico" type="email" autoComplete="email" hint="Solo @gmail.com." {...form.campo('correo')} />
       <FormField label="Contraseña" type="password" autoComplete="current-password" hint="Entre 4 y 10 caracteres." {...form.campo('password')} />
       {errorGeneral && <div className="alert alert-danger py-2" role="alert">{errorGeneral}</div>}
-      <Button type="submit" className="w-100">Iniciar sesión</Button>
+      <Button type="submit" className="w-100" disabled={enviando}>{enviando ? 'Ingresando…' : 'Iniciar sesión'}</Button>
     </form>
   );
 }

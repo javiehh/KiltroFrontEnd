@@ -11,14 +11,26 @@ export function AccesoDenegado() {
   );
 }
 
+function VerificandoSesion() {
+  return (
+    <div className="container py-5 text-center" role="status" data-testid="verificando-sesion">
+      <div className="spinner-border text-primary" aria-hidden="true" />
+      <p className="mt-3 text-secondary">Verificando sesión…</p>
+    </div>
+  );
+}
+
 /**
- * Protege una ruta: sin sesión manda al login (recordando a dónde quería ir);
- * con sesión pero sin el rol necesario muestra "Acceso denegado".
+ * Protege una ruta según un PERMISO (ver permisos.js), no según el nombre del rol.
+ *  - mientras se confirma la sesión con el servidor muestra un indicador: así recargar con F5 no te manda al login;
+ *  - sin sesión redirige al login (y recuerda a dónde querías ir);
+ *  - con sesión pero sin el permiso, muestra "Acceso denegado".
  */
-export default function ProtectedRoute({ roles, children }) {
-  const { usuario } = useAuth();
+export default function ProtectedRoute({ permiso, children }) {
+  const { usuario, cargando, puede } = useAuth();
   const location = useLocation();
+  if (cargando) return <VerificandoSesion />;
   if (!usuario) return <Navigate to="/login" replace state={{ from: location.pathname }} />;
-  if (roles && !roles.includes(usuario.tipo)) return <AccesoDenegado />;
+  if (permiso && !puede(permiso)) return <AccesoDenegado />;
   return children;
 }

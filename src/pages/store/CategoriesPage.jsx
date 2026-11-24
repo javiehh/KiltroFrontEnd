@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom';
-import { categoriasRepo, productosRepo } from '../../data/db.js';
-import { useCollection } from '../../hooks/useCollection.js';
+import { useCatalogo } from '../../hooks/useCatalogo.js';
+import ConEstado from '../../components/common/ConEstado.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import ProductGrid from '../../components/common/ProductGrid.jsx';
 import { ICONOS } from '../../data/iconos.js';
@@ -8,8 +8,7 @@ import { ICONOS } from '../../data/iconos.js';
 /** Vista de categorías: tarjetas para elegir una categoría y, debajo, los productos de la categoría elegida. */
 export default function CategoriesPage() {
   const { id } = useParams();
-  const categorias = useCollection(categoriasRepo);
-  const productos = useCollection(productosRepo);
+  const { productos, categorias, cargado, cargando, error, recargar } = useCatalogo();
 
   const activa = categorias.find((c) => String(c.id) === id) || categorias[0];
   const deLaCategoria = activa ? productos.filter((p) => p.categoriaId === activa.id) : [];
@@ -18,6 +17,9 @@ export default function CategoriesPage() {
     <>
       <PageHeader oscuro titulo="Categorías" subtitulo="Encuentra lo que necesitas según el tipo de mascota." />
       <div className="container">
+        <ConEstado listo={cargado} cargando={cargando} error={error} onReintentar={recargar}>
+          {() => (
+            <>
         <div className="row g-3 row-cols-2 row-cols-md-4 mb-5" role="tablist" aria-label="Categorías">
           {categorias.map((c) => (
             <div className="col" key={c.id}>
@@ -35,9 +37,12 @@ export default function CategoriesPage() {
           <section aria-labelledby="titulo-categoria-activa">
             <h2 id="titulo-categoria-activa" className="kiltro-heading mb-1">{activa.nombre}</h2>
             <p className="text-secondary">{activa.descripcion}</p>
-            <ProductGrid productos={deLaCategoria} mensajeVacio="Esta categoría aún no tiene productos." />
+            <ProductGrid productos={deLaCategoria} categorias={categorias} mensajeVacio="Esta categoría aún no tiene productos." />
           </section>
         )}
+            </>
+          )}
+        </ConEstado>
       </div>
     </>
   );

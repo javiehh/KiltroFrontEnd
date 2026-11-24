@@ -1,23 +1,51 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ordenesRepo } from '../../data/db.js';
-import { useCollection } from '../../hooks/useCollection.js';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { obtenerBoleta } from '../../api/boletasApi.js';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { useApi } from '../../hooks/useApi.js';
 import Boleta from '../../components/common/Boleta.jsx';
 import Button from '../../components/common/Button.jsx';
+import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 
 /**
- * Resultado de la compra. Una sola página para las dos vistas del diagrama (pago correcto / pago con error):
- * `exito` decide cuál se muestra. Si la orden no corresponde al resultado, se avisa.
+ * Resultado de la compra, en una sola página para las dos vistas:
+ *  - exito: la boleta que devolvió el servidor (201). Llega por el estado de navegación; si se recargó la página y hay
+ *    sesión, se vuelve a pedir al servidor (solo su dueño puede verla).
+ *  - error: el motivo que informó el servidor (409 sin stock, 503 servicio caído...). El carrito se conserva.
  */
 export default function PaymentResultPage({ exito }) {
-  const { numero } = useParams();
-  const ordenes = useCollection(ordenesRepo);
+  const { id } = useParams();
+  const { state } = useLocation();
+  const { usuario } = useAuth();
   const navigate = useNavigate();
   const [correoEnviado, setCorreoEnviado] = useState(false);
 
-  const orden = ordenes.find((o) => o.numero === numero);
-  if (!orden || (orden.estado === 'pagada') !== exito) {
+  const guardada = state?.orden ?? null;
+  const consulta = useApi(
+    () => (exito && !guardada && usuario ? obtenerBoleta(id) : Promise.resolve(null)),
+    [id, exito, usuario?.id]
+  );
+
+  if (!exito) {
+    return (
+      <div className="container py-4" style={{ maxWidth: 860 }}>
+        <div className="card shadow-sm"><div className="card-body text-center py-5">
+          <h1 className="h4 kiltro-heading text-danger"><i className="bi bi-x-circle me-2" aria-hidden="true" />No se pudo realizar la compra</h1>
+          <p className="text-danger mt-3" data-testid="motivo">{state?.motivo || 'Ocurrió un problema al procesar tu compra.'}</p>
+          <p className="text-secondary">No se te cobró nada y tu carrito sigue intacto. Revisa las cantidades y vuelve a intentarlo.</p>
+          <div className="d-flex justify-content-center gap-2 flex-wrap">
+            <Button variant="success" onClick={() => navigate('/carrito')}>Volver al carrito</Button>
+            <Button variant="outline-primary" onClick={() => navigate('/checkout')}>Reintentar el pago</Button>
+          </div>
+        </div></div>
+      </div>
+    );
+  }
+
+  const orden = guardada ?? consulta.datos;
+  if (!orden && consulta.cargando) return <div className="container py-5"><Cargando /></div>;
+  if (!orden) {
     return <div className="container py-5"><EmptyState mensaje="No encontramos esa compra."><Link to="/" className="btn btn-primary">Volver al inicio</Link></EmptyState></div>;
   }
 
@@ -25,26 +53,14 @@ export default function PaymentResultPage({ exito }) {
     <div className="container py-4" style={{ maxWidth: 860 }}>
       <div className="card shadow-sm"><div className="card-body">
         <div className="d-flex justify-content-between flex-wrap gap-2 mb-3">
-          {exito ? (
-            <h1 className="h4 kiltro-heading text-success"><i className="bi bi-check-circle me-2" aria-hidden="true" />Se ha realizado la compra. nro #{orden.numero}</h1>
-          ) : (
-            <h1 className="h4 kiltro-heading text-danger"><i className="bi bi-x-circle me-2" aria-hidden="true" />No se pudo realizar el pago. nro #{orden.numero}</h1>
-          )}
+          <h1 className="h4 kiltro-heading text-success"><i className="bi bi-check-circle me-2" aria-hidden="true" />Se ha realizado la compra. nro #{orden.id}</h1>
           <small className="text-secondary">Código orden: {orden.codigo}</small>
         </div>
-        {!exito && (
-          <div className="mb-3">
-            <p className="text-danger mb-2">Motivo: {orden.motivoRechazo || 'El pago no fue aprobado.'}</p>
-            <Button variant="success" onClick={() => navigate('/checkout', { state: { reintento: orden.numero } })}>VOLVER A REALIZAR EL PAGO</Button>
-          </div>
-        )}
         <Boleta orden={orden} />
-        {exito && (
-          <div className="d-flex justify-content-center gap-2 mt-3 flex-wrap">
-            <Button variant="danger" size="sm" onClick={() => window.print()}>Imprimir boleta en PDF</Button>
-            <Button variant="success" size="sm" onClick={() => setCorreoEnviado(true)}>Enviar boleta por email</Button>
-          </div>
-        )}
+        <div className="d-flex justify-content-center gap-2 mt-3 flex-wrap">
+          <Button variant="danger" size="sm" onClick={() => window.print()}>Imprimir boleta en PDF</Button>
+          <Button variant="success" size="sm" onClick={() => setCorreoEnviado(true)}>Enviar boleta por email</Button>
+        </div>
         {correoEnviado && <div className="alert alert-success mt-3 mb-0" role="status">Boleta enviada a {orden.cliente.correo} (envío simulado).</div>}
       </div></div>
       <div className="text-center mt-3"><Link to="/productos">Seguir comprando</Link></div>

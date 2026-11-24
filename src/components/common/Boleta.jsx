@@ -29,7 +29,7 @@ export default function Boleta({ orden }) {
         </table>
       </div>
       <div className="bg-body-tertiary rounded p-3 text-center fs-5 fw-bold">
-        {orden.estado === 'pagada' ? 'Total pagado' : 'Total a pagar'}: {formatoCLP(orden.total)}
+        {orden.estado === 'ANULADA' ? 'Total anulado' : 'Total pagado'}: {formatoCLP(orden.total)}
       </div>
       <p className="small text-secondary text-end mt-2 mb-0">Orden {orden.codigo} · {formatoFecha(orden.fecha)}</p>
     </div>

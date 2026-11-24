@@ -7,9 +7,12 @@ export default function RegisterPage() {
   const { registrar } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
+  const [enviando, setEnviando] = useState(false);
 
-  const crear = (datos) => {
-    const resultado = registrar(datos);
+  const crear = async (datos) => {
+    setEnviando(true);
+    const resultado = await registrar(datos);
+    setEnviando(false);
     if (!resultado.ok) { setError(resultado.error); return; }
     navigate('/login', { state: { registroOk: true } });
   };
@@ -18,7 +21,7 @@ export default function RegisterPage() {
     <div className="container py-5" style={{ maxWidth: 760 }}>
       <div className="card shadow-sm"><div className="card-body p-4">
         <h1 className="h4 kiltro-heading mb-3">Registro de usuario</h1>
-        <UserForm modo="registro" onSubmit={crear} errorGeneral={error} />
+        <UserForm modo="registro" onSubmit={crear} errorGeneral={error} enviando={enviando} />
         <p className="small mt-3 mb-0">¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>.</p>
       </div></div>
     </div>

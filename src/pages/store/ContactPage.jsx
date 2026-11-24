@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { mensajesRepo } from '../../data/db.js';
+import { guardarMensaje } from '../../data/mensajes.js';
 import ContactForm from '../../components/forms/ContactForm.jsx';
 
 export default function ContactPage() {
   const [enviado, setEnviado] = useState(false);
 
   const guardar = ({ nombre, correo, mensaje }) => {
-    mensajesRepo.crear({ nombre, correo, mensaje, fecha: new Date().toISOString() });
+    guardarMensaje({ nombre, correo, mensaje, fecha: new Date().toISOString() });
     setEnviado(true);
   };
 

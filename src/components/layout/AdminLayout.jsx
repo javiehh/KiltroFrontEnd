@@ -1,28 +1,25 @@
 import { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
-import { ROLES } from '../../data/constantes.js';
+import { PERMISOS } from '../../permisos.js';
 import Logo from './Logo.jsx';
 
-const TODOS = [ROLES.ADMIN, ROLES.VENDEDOR];
-const SOLO_ADMIN = [ROLES.ADMIN];
-
-/** Opciones del menú lateral y qué roles las pueden ver (el Vendedor solo ve productos y órdenes). */
+/** Opciones del menú lateral y el permiso que exige cada una (ver permisos.js: el Vendedor solo ve productos y órdenes). */
 export const MENU_ADMIN = [
-  { ruta: '/admin', texto: 'Dashboard', icono: 'bi-speedometer2', roles: TODOS, fin: true },
-  { ruta: '/admin/ordenes', texto: 'Órdenes', icono: 'bi-receipt', roles: TODOS },
-  { ruta: '/admin/productos', texto: 'Productos', icono: 'bi-box-seam', roles: TODOS },
-  { ruta: '/admin/categorias', texto: 'Categorías', icono: 'bi-tags', roles: SOLO_ADMIN },
-  { ruta: '/admin/usuarios', texto: 'Usuarios', icono: 'bi-people', roles: SOLO_ADMIN },
-  { ruta: '/admin/reportes', texto: 'Reportes', icono: 'bi-bar-chart', roles: SOLO_ADMIN },
-  { ruta: '/admin/perfil', texto: 'Perfil', icono: 'bi-person-circle', roles: TODOS }
+  { ruta: '/admin', texto: 'Dashboard', icono: 'bi-speedometer2', permiso: PERMISOS.REPORTES_VER, fin: true },
+  { ruta: '/admin/ordenes', texto: 'Órdenes', icono: 'bi-receipt', permiso: PERMISOS.ORDENES_VER },
+  { ruta: '/admin/productos', texto: 'Productos', icono: 'bi-box-seam', permiso: PERMISOS.PRODUCTOS_VER },
+  { ruta: '/admin/categorias', texto: 'Categorías', icono: 'bi-tags', permiso: PERMISOS.CATEGORIAS_GESTIONAR },
+  { ruta: '/admin/usuarios', texto: 'Usuarios', icono: 'bi-people', permiso: PERMISOS.USUARIOS_GESTIONAR },
+  { ruta: '/admin/reportes', texto: 'Reportes', icono: 'bi-bar-chart', permiso: PERMISOS.REPORTES_VER },
+  { ruta: '/admin/perfil', texto: 'Perfil', icono: 'bi-person-circle', permiso: PERMISOS.PERFIL_PROPIO }
 ];
 
 export default function AdminLayout() {
-  const { usuario, logout } = useAuth();
+  const { usuario, logout, puede } = useAuth();
   const navigate = useNavigate();
   const [abierto, setAbierto] = useState(false);
-  const opciones = MENU_ADMIN.filter((o) => o.roles.includes(usuario.tipo));
+  const opciones = MENU_ADMIN.filter((o) => puede(o.permiso));
 
   return (
     <div className="d-flex flex-column min-vh-100">

@@ -1,22 +1,17 @@
 import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { Container, Nav, NavDropdown, Navbar as BsNavbar } from 'react-bootstrap';
-import { categoriasRepo } from '../../data/db.js';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useCart } from '../../hooks/useCart.js';
-import { useCollection } from '../../hooks/useCollection.js';
+import { useCatalogo } from '../../hooks/useCatalogo.js';
 import { formatoCLP } from '../../utils/format.js';
 import Logo from './Logo.jsx';
 
-/**
- * Barra de navegación de la tienda (basada en el template de la Evaluación 2):
- * logo, enlaces (Home, Categorías, Ofertas, Nosotros, Blog, Contacto), buscador,
- * carrito con el total en vivo y acceso/ sesión del usuario.
- */
+/* Barra de navegación de la tienda */
 export default function Navbar() {
   const [busqueda, setBusqueda] = useState('');
   const navigate = useNavigate();
-  const categorias = useCollection(categoriasRepo);
+  const { categorias } = useCatalogo();
   const { usuario, logout, puedeEntrarAlPanel } = useAuth();
   const { total, cantidad } = useCart();
 
@@ -45,6 +40,11 @@ export default function Navbar() {
             <Nav.Link as={NavLink} to="/nosotros">Nosotros</Nav.Link>
             <Nav.Link as={NavLink} to="/blog">Blog</Nav.Link>
             <Nav.Link as={NavLink} to="/contacto">Contacto</Nav.Link>
+            {puedeEntrarAlPanel && (
+              <Nav.Link as={NavLink} to="/admin" className="fw-semibold" data-testid="enlace-panel-admin">
+                <i className="bi bi-shield-lock me-1" aria-hidden="true" />Panel de admin
+              </Nav.Link>
+            )}
           </Nav>
 
           <form className="d-flex me-lg-3 my-2 my-lg-0" role="search" onSubmit={buscar}>

@@ -1,5 +1,6 @@
-import { Route, Routes } from 'react-router-dom';
-import { ROLES } from './data/constantes.js';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { PERMISOS } from './permisos.js';
+import { useAuth } from './context/AuthContext.jsx';
 import StoreLayout from './components/layout/StoreLayout.jsx';
 import AdminLayout from './components/layout/AdminLayout.jsx';
 import ProtectedRoute from './components/layout/ProtectedRoute.jsx';
@@ -37,13 +38,15 @@ import UserHistoryPage from './pages/admin/UserHistoryPage.jsx';
 import ReportsPage from './pages/admin/ReportsPage.jsx';
 import ProfilePage from './pages/admin/ProfilePage.jsx';
 
-const SOLO_ADMIN = [ROLES.ADMIN];
-const solo = (pagina) => <ProtectedRoute roles={SOLO_ADMIN}>{pagina}</ProtectedRoute>;
+/** Envuelve una página con el permiso que exige (ver permisos.js). */
+const requiere = (permiso, pagina) => <ProtectedRoute permiso={permiso}>{pagina}</ProtectedRoute>;
 
-/**
- * Mapa de navegación (Figuras 2, 3 y 10 del Anexo 1 de la Evaluación 2).
- * Tienda: pública. Panel: Administrador y Vendedor; lo que modifica datos, solo el Administrador.
- */
+/** El Dashboard (reportes) es solo del Administrador; el Vendedor entra directo a las órdenes. */
+function InicioDelPanel() {
+  const { puede } = useAuth();
+  return puede(PERMISOS.REPORTES_VER) ? <DashboardPage /> : <Navigate to="ordenes" replace />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -56,8 +59,8 @@ export default function App() {
         <Route path="ofertas" element={<OffersPage />} />
         <Route path="carrito" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
-        <Route path="compra/exitosa/:numero" element={<PaymentResultPage exito />} />
-        <Route path="compra/error/:numero" element={<PaymentResultPage exito={false} />} />
+        <Route path="compra/exitosa/:id" element={<PaymentResultPage exito />} />
+        <Route path="compra/error" element={<PaymentResultPage exito={false} />} />
         <Route path="login" element={<LoginPage />} />
         <Route path="registro" element={<RegisterPage />} />
         <Route path="nosotros" element={<AboutPage />} />
@@ -67,26 +70,26 @@ export default function App() {
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
-      <Route path="admin" element={<ProtectedRoute roles={[ROLES.ADMIN, ROLES.VENDEDOR]}><AdminLayout /></ProtectedRoute>}>
-        <Route index element={<DashboardPage />} />
-        <Route path="ordenes" element={<OrdersPage />} />
-        <Route path="ordenes/:numero" element={<OrderDetailPage />} />
-        <Route path="productos" element={<AdminProductsPage />} />
-        <Route path="productos/nuevo" element={solo(<ProductEditorPage />)} />
-        <Route path="productos/criticos" element={<CriticalProductsPage />} />
-        <Route path="productos/reportes" element={solo(<ProductReportsPage />)} />
-        <Route path="productos/:id" element={<AdminProductDetailPage />} />
-        <Route path="productos/:id/editar" element={solo(<ProductEditorPage />)} />
-        <Route path="categorias" element={solo(<AdminCategoriesPage />)} />
-        <Route path="categorias/nueva" element={solo(<CategoryEditorPage />)} />
-        <Route path="categorias/:id/editar" element={solo(<CategoryEditorPage />)} />
-        <Route path="usuarios" element={solo(<AdminUsersPage />)} />
-        <Route path="usuarios/nuevo" element={solo(<UserEditorPage />)} />
-        <Route path="usuarios/:run" element={solo(<UserDetailPage />)} />
-        <Route path="usuarios/:run/editar" element={solo(<UserEditorPage />)} />
-        <Route path="usuarios/:run/historial" element={solo(<UserHistoryPage />)} />
-        <Route path="reportes" element={solo(<ReportsPage />)} />
-        <Route path="perfil" element={<ProfilePage />} />
+      <Route path="admin" element={requiere(PERMISOS.PANEL, <AdminLayout />)}>
+        <Route index element={<InicioDelPanel />} />
+        <Route path="ordenes" element={requiere(PERMISOS.ORDENES_VER, <OrdersPage />)} />
+        <Route path="ordenes/:id" element={requiere(PERMISOS.ORDENES_VER, <OrderDetailPage />)} />
+        <Route path="productos" element={requiere(PERMISOS.PRODUCTOS_VER, <AdminProductsPage />)} />
+        <Route path="productos/nuevo" element={requiere(PERMISOS.PRODUCTOS_GESTIONAR, <ProductEditorPage />)} />
+        <Route path="productos/criticos" element={requiere(PERMISOS.PRODUCTOS_GESTIONAR, <CriticalProductsPage />)} />
+        <Route path="productos/reportes" element={requiere(PERMISOS.REPORTES_VER, <ProductReportsPage />)} />
+        <Route path="productos/:id" element={requiere(PERMISOS.PRODUCTOS_VER, <AdminProductDetailPage />)} />
+        <Route path="productos/:id/editar" element={requiere(PERMISOS.PRODUCTOS_GESTIONAR, <ProductEditorPage />)} />
+        <Route path="categorias" element={requiere(PERMISOS.CATEGORIAS_GESTIONAR, <AdminCategoriesPage />)} />
+        <Route path="categorias/nueva" element={requiere(PERMISOS.CATEGORIAS_GESTIONAR, <CategoryEditorPage />)} />
+        <Route path="categorias/:id/editar" element={requiere(PERMISOS.CATEGORIAS_GESTIONAR, <CategoryEditorPage />)} />
+        <Route path="usuarios" element={requiere(PERMISOS.USUARIOS_GESTIONAR, <AdminUsersPage />)} />
+        <Route path="usuarios/nuevo" element={requiere(PERMISOS.USUARIOS_GESTIONAR, <UserEditorPage />)} />
+        <Route path="usuarios/:id" element={requiere(PERMISOS.USUARIOS_GESTIONAR, <UserDetailPage />)} />
+        <Route path="usuarios/:id/editar" element={requiere(PERMISOS.USUARIOS_GESTIONAR, <UserEditorPage />)} />
+        <Route path="usuarios/:id/historial" element={requiere(PERMISOS.USUARIOS_GESTIONAR, <UserHistoryPage />)} />
+        <Route path="reportes" element={requiere(PERMISOS.REPORTES_VER, <ReportsPage />)} />
+        <Route path="perfil" element={requiere(PERMISOS.PERFIL_PROPIO, <ProfilePage />)} />
       </Route>
     </Routes>
   );

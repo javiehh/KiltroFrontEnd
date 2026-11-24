@@ -14,7 +14,7 @@ const VACIO = { run: '', tipo: '', nombre: '', apellidos: '', correo: '', passwo
  *  - editar:   el administrador edita un usuario (RUN no editable; contraseña opcional)
  *  - perfil:   cada usuario edita sus propios datos (RUN y rol no editables)
  */
-export default function UserForm({ modo = 'registro', inicial, onSubmit, onCancel, errorGeneral = '', textoBoton }) {
+export default function UserForm({ modo = 'registro', inicial, onSubmit, onCancel, errorGeneral = '', textoBoton, enviando = false }) {
   const edicion = modo === 'editar' || modo === 'perfil';
   const reglas = {
     run: [esRequerido, runValido],
@@ -66,7 +66,7 @@ export default function UserForm({ modo = 'registro', inicial, onSubmit, onCance
       </div>
       {errorGeneral && <div className="alert alert-danger py-2" role="alert">{errorGeneral}</div>}
       <div className="d-flex gap-2">
-        <Button type="submit">{textoBoton || (modo === 'registro' ? 'Crear cuenta' : 'Guardar usuario')}</Button>
+        <Button type="submit" disabled={enviando}>{enviando ? 'Guardando…' : textoBoton || (modo === 'registro' ? 'Crear cuenta' : 'Guardar usuario')}</Button>
         {onCancel && <Button variant="outline-secondary" onClick={onCancel}>Cancelar</Button>}
       </div>
     </form>
