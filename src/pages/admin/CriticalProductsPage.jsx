@@ -5,7 +5,6 @@ import { ConConsulta } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Productos críticos (GET /productos/criticos, solo ADMIN): los que tienen stock igual o inferior a su stock crítico. */
 export default function CriticalProductsPage() {
   const consulta = useApi(listarCriticos);
   return (

@@ -1,13 +1,3 @@
-/**
- * Almacén compartido del catálogo (productos y categorías), que es de lectura pública y cambia poco.
- *
- * Lo usan el menú, el carrito, el inicio, etc. Sin este almacén, cada componente pediría el catálogo por su cuenta
- * y una sola pantalla haría 5 o 6 peticiones iguales. Aquí:
- *  - peticiones simultáneas comparten UNA sola llamada al servidor;
- *  - el resultado se reutiliza durante `vigenciaMs` (30 s);
- *  - después de cambiar algo (crear un producto, comprar...) se llama a invalidar() para recargarlo.
- * Es una función "fábrica" para poder probarla con datos falsos, sin red.
- */
 import { listarCategorias } from './categoriasApi.js';
 import { listarProductos } from './productosApi.js';
 import { mensajeDeError } from './errores.js';
@@ -37,7 +27,6 @@ export function crearCatalogo({ cargarProductos, cargarCategorias, vigenciaMs = 
   }
 
   return {
-    /** Mismo objeto mientras no haya cambios (requisito de useSyncExternalStore). */
     obtener: () => estado,
     suscribir(fn) {
       oyentes.add(fn);
@@ -50,5 +39,4 @@ export function crearCatalogo({ cargarProductos, cargarCategorias, vigenciaMs = 
 
 export const catalogo = crearCatalogo({ cargarProductos: listarProductos, cargarCategorias: listarCategorias });
 
-/** Hay que llamarla después de crear, editar o eliminar productos o categorías, y después de comprar o anular (cambia el stock). */
 export const invalidarCatalogo = () => catalogo.invalidar();

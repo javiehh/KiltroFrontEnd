@@ -1,7 +1,3 @@
-/*
- * Tema de Kiltro sobre Bootstrap 5: se redefinen las variables de Bootstrap con la paleta de la marca
- * (verde pino + mostaza) y se agregan unas pocas clases propias (prefijo "kiltro-").
- */
 :root {
   --kiltro-pine: #1f3a2e;
   --kiltro-pine-light: #2c4c3b;
@@ -22,7 +18,6 @@
 
 .kiltro-heading { font-family: 'Fraunces', Georgia, serif; font-weight: 600; }
 
-/* Botón principal: mostaza con texto pino */
 .btn-primary {
   --bs-btn-color: var(--kiltro-pine);
   --bs-btn-bg: var(--kiltro-mustard);
@@ -53,7 +48,6 @@
 .form-check-input:checked { background-color: var(--kiltro-pine); border-color: var(--kiltro-pine); }
 .form-control:focus, .form-select:focus { border-color: var(--kiltro-mustard); box-shadow: 0 0 0 0.2rem rgba(217, 164, 65, 0.25); }
 
-/* Navegación */
 .kiltro-navbar { background: var(--kiltro-pine); }
 .kiltro-navbar .nav-link { color: #e6ece7; }
 .kiltro-navbar .nav-link:hover, .kiltro-navbar .nav-link.active { color: var(--kiltro-mustard); }
@@ -62,7 +56,6 @@
 .kiltro-footer { background: var(--kiltro-pine); color: #a9b6a9; }
 .kiltro-footer a { color: #d9e0d6; }
 
-/* Encabezados de página y secciones */
 .kiltro-page-header { background: var(--kiltro-pine); color: #fff; }
 .kiltro-page-header p { color: #d9e0d6; }
 .kiltro-about { background: #fff; border-top: 1px solid #e1d9c4; border-bottom: 1px solid #e1d9c4; }
@@ -71,7 +64,6 @@
 .kiltro-eyebrow { color: var(--kiltro-mustard); font-weight: 600; }
 .kiltro-tag { color: var(--kiltro-rust); font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
 
-/* Carrusel de la home */
 .kiltro-slide {
   min-height: 420px; display: flex; align-items: center; color: #fff;
   background-color: var(--kiltro-pine); background-size: cover; background-position: center;
@@ -80,7 +72,6 @@
 .kiltro-slide--blog { background: linear-gradient(120deg, var(--kiltro-pine-light), var(--kiltro-pine)); }
 .kiltro-carousel .carousel-indicators { margin-bottom: 0.6rem; }
 
-/* Tarjetas y medios */
 .kiltro-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
 .kiltro-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px -18px rgba(28, 35, 33, 0.5) !important; }
 .kiltro-media { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
@@ -91,14 +82,12 @@
 .kiltro-thumb svg { width: 24px; height: 24px; }
 .kiltro-lista-scroll { max-height: 520px; overflow-y: auto; }
 
-/* Panel de administración */
 .kiltro-sidebar { width: 230px; flex: 0 0 230px; background: #fff; border-right: 1px solid #e1d9c4; }
 .kiltro-sidebar .nav-link { color: #1c2321; }
 .kiltro-sidebar .nav-link.active { background: var(--kiltro-mustard); color: var(--kiltro-pine); font-weight: 600; }
 .kiltro-admin-main { min-width: 0; }
 @media (max-width: 991.98px) { .kiltro-sidebar { width: 100%; flex: none; border-right: 0; border-bottom: 1px solid #e1d9c4; } }
 
-/* Al imprimir la boleta solo se ve el contenido */
 @media print {
   .kiltro-navbar, .kiltro-footer, .kiltro-sidebar, .btn, nav { display: none !important; }
 }

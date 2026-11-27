@@ -12,7 +12,6 @@ import Button from '../../components/common/Button.jsx';
 import { ConConsulta } from '../../components/common/ConEstado.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Listado de productos del panel. Todos los del panel lo ven; solo quien tiene el permiso crea, edita o elimina. */
 export default function AdminProductsPage() {
   const consulta = useApi(listarProductos);
   const { puede } = useAuth();

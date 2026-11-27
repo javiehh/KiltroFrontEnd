@@ -6,7 +6,6 @@ import { ConConsulta } from '../../components/common/ConEstado.jsx';
 import OrdersTable from '../../components/common/OrdersTable.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Órdenes / boletas de todas las compras (GET /boletas: ADMIN y VENDEDOR), con filtro por estado. */
 export default function OrdersPage() {
   const consulta = useApi(listarBoletas);
   const [estado, setEstado] = useState('');

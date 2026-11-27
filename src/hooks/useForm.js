@@ -1,14 +1,6 @@
 import { useState } from 'react';
 import { validarValor } from '../utils/validators.js';
 
-/**
- * Manejo de formularios controlados con validación en tiempo real.
- *  - values: estado de cada campo
- *  - errors: mensaje de error de cada campo (siempre calculado)
- *  - campo(name): props listas para <FormField {...campo('correo')} /> (muestra el error solo
- *    después de que el usuario tocó el campo o intentó enviar)
- *  - enviar(fn): onSubmit que valida todo y solo llama a fn(values) si no hay errores
- */
 export function useForm(valoresIniciales, reglas = {}) {
   const [values, setValues] = useState(valoresIniciales);
   const [tocados, setTocados] = useState({});

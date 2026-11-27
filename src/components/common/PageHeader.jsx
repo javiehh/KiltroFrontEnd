@@ -1,4 +1,3 @@
-/** Encabezado de página: título, subtítulo opcional y acciones (botones) a la derecha. */
 export default function PageHeader({ titulo, subtitulo, children, oscuro = false }) {
   return (
     <div className={oscuro ? 'kiltro-page-header py-5 mb-4' : 'mb-4'}>

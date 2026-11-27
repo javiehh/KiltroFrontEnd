@@ -1,8 +1,3 @@
-/**
- * Campo de formulario con etiqueta, ayuda y mensaje de error.
- * El mensaje de error SOLO se renderiza cuando la prop `error` trae texto (renderizado condicional).
- * as: 'input' (por defecto) | 'select' | 'textarea' | 'checkbox'
- */
 export default function FormField({ id, label, as = 'input', error = '', hint, children, className = 'mb-3', ...props }) {
   const claseControl = `${as === 'select' ? 'form-select' : 'form-control'}${error ? ' is-invalid' : ''}`;
   const comun = { id, 'aria-invalid': error ? 'true' : undefined, 'aria-describedby': error ? `${id}-error` : undefined };

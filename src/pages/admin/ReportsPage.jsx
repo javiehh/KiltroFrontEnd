@@ -10,10 +10,6 @@ import { ConConsulta } from '../../components/common/ConEstado.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import StatCard from '../../components/common/StatCard.jsx';
 
-/**
- * Reportes generales. Los totales los calcula el servidor (GET /reportes/resumen); el detalle por categoría y por
- * producto se calcula aquí con las boletas. Los mensajes de contacto siguen guardados en este navegador.
- */
 export default function ReportsPage() {
   const consulta = useApi(() => Promise.all([obtenerResumenVentas(), listarBoletas(), listarProductos(), listarCategorias(), listarUsuarios()]));
   const mensajes = listarMensajes();

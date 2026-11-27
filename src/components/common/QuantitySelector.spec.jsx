@@ -13,6 +13,6 @@ describe('Simulación de eventos', () => {
     fireEvent.click(screen.getByLabelText('Aumentar'));
     expect(screen.getByTestId('estado').textContent).toBe('2');
     fireEvent.change(screen.getByRole('spinbutton'), { target: { value: '99' } });
-    expect(screen.getByTestId('estado').textContent).toBe('5'); // no pasa del máximo
+    expect(screen.getByTestId('estado').textContent).toBe('5');
   });
 });

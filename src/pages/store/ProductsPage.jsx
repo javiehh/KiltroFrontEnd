@@ -5,7 +5,6 @@ import ConEstado from '../../components/common/ConEstado.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import ProductGrid from '../../components/common/ProductGrid.jsx';
 
-/** Catálogo completo con filtros combinables: texto (también desde el buscador del navbar), categoría, ofertas y orden. */
 export default function ProductsPage() {
   const { productos, categorias, cargado, cargando, error, recargar } = useCatalogo();
   const [params, setParams] = useSearchParams();

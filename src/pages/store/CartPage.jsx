@@ -12,10 +12,6 @@ import PageHeader from '../../components/common/PageHeader.jsx';
 import ProductMedia from '../../components/common/ProductMedia.jsx';
 import QuantitySelector from '../../components/common/QuantitySelector.jsx';
 
-/**
- * Carrito de compras: a la izquierda el catálogo para seguir agregando, a la derecha el detalle del carrito.
- * Los productos, precios y stock vienen de ms-productos; solo las cantidades elegidas se guardan en el navegador.
- */
 export default function CartPage() {
   const { productos, cargado, cargando, error, recargar } = useCatalogo();
   const { detalle, total } = useCart();

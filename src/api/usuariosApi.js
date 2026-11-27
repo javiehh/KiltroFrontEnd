@@ -1,4 +1,3 @@
-/** Llamadas a ms-usuarios (puerto 8081): administración de usuarios (solo ADMIN). */
 import { apiUsuarios } from './http.js';
 import { usuarioAApi, usuarioDesdeApi } from './adaptadores.js';
 

@@ -4,14 +4,14 @@ const item = (productoId, nombre, cantidad, precio) => ({ productoId, nombre, ca
 const boletas = [
   { id: 1, estado: 'PAGADA', items: [item(1, 'Alimento', 2, 1000), item(2, 'Correa', 1, 500)] },
   { id: 2, estado: 'ENVIADA', items: [item(1, 'Alimento', 1, 1000)] },
-  { id: 3, estado: 'ANULADA', items: [item(2, 'Correa', 10, 500)] } // no debe contar
+  { id: 3, estado: 'ANULADA', items: [item(2, 'Correa', 10, 500)] }
 ];
 
 describe('Reportes', () => {
   it('las boletas anuladas no cuentan como venta', () => {
     expect(cantidadAnuladas(boletas)).toBe(1);
     const top = topProductos(boletas, 5);
-    expect(top.find((t) => t.productoId === 2).unidades).toBe(1); // no suma las 10 de la boleta anulada
+    expect(top.find((t) => t.productoId === 2).unidades).toBe(1);
   });
 
   it('topProductos ordena por unidades vendidas y suma los ingresos', () => {

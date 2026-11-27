@@ -7,7 +7,6 @@ import { apiProductos, apiVentas } from '../../api/http.js';
 import { agregarAlCarrito, carritoStore } from '../../data/carrito.js';
 import { CATEGORIAS_PRUEBA, PRODUCTOS_PRUEBA, renderConApp, reiniciarTodo, RUN } from '../../test-utils.jsx';
 
-/** Respuesta simulada: 2xx resuelve; el resto rechaza como lo haría axios. */
 function responder(config, status, data) {
   const respuesta = { data, status, statusText: '', headers: {}, config };
   if (status >= 200 && status < 300) return Promise.resolve(respuesta);
@@ -53,7 +52,7 @@ describe('Checkout contra ms-ventas', () => {
     expect(await screen.findByText('COMPRA REALIZADA')).toBeTruthy();
     expect(carritoStore.obtener().length).toBe(0);
     expect(peticionesDeCompra[0].items).toEqual([{ productoId: 1, cantidad: 2 }]);
-    expect(JSON.stringify(peticionesDeCompra[0])).not.toContain('29742'); // ningún precio sale del navegador
+    expect(JSON.stringify(peticionesDeCompra[0])).not.toContain('29742');
   });
 
   it('con 409 (sin stock) muestra el motivo del servidor y CONSERVA el carrito', async () => {

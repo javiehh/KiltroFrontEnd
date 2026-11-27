@@ -1,14 +1,9 @@
-/**
- * Cálculos para los reportes (funciones puras: reciben los datos que entrega la API y devuelven números).
- * Las boletas anuladas no cuentan como venta, igual que en el backend.
- */
 import { ESTADOS_BOLETA, ROLES } from './constantes.js';
 
 const vigentes = (boletas) => boletas.filter((b) => b.estado !== ESTADOS_BOLETA.ANULADA);
 
 export const cantidadAnuladas = (boletas) => boletas.length - vigentes(boletas).length;
 
-/** Unidades e ingresos por producto, de mayor a menor cantidad vendida. */
 export function topProductos(boletas, limite = 5) {
   const mapa = new Map();
   vigentes(boletas).forEach((b) =>

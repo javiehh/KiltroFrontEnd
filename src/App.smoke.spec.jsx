@@ -1,8 +1,3 @@
-/**
- * Prueba de humo: dibuja CADA ruta de la aplicación contra un servidor simulado y comprueba que ninguna se rompe
- * (errores de código, variables sin definir...) y que terminan de cargar sin mostrar el error de conexión.
- * También revisa que los permisos se reflejan en pantalla: el Vendedor no ve ni entra a lo del Administrador.
- */
 import { AxiosError } from 'axios';
 import { screen, waitFor } from '@testing-library/react';
 import App from './App.jsx';
@@ -57,7 +52,6 @@ const servidorVentas = (config) => {
   return responder(config, undefined);
 };
 
-/** Espera (con errores lanzados, no con expect de Jasmine) a que termine de cargar. */
 const esperarCarga = () =>
   waitFor(() => {
     if (screen.queryByTestId('cargando') || screen.queryByTestId('verificando-sesion')) throw new Error('sigue cargando');

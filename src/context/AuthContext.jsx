@@ -7,10 +7,6 @@ import { guardarPerfil, iniciarSesion, obtenerSesion, registrarCuenta } from '..
 
 export const AuthContext = createContext(null);
 
-/**
- * Arma el valor que reciben los componentes. Está aparte del Provider para que las pruebas puedan
- * entregar un usuario sin llamar a la API (ver test-utils.jsx).
- */
 export function construirValor({ usuario = null, cargando = false, sesionExpirada = false, acciones = {} } = {}) {
   return {
     usuario,
@@ -31,18 +27,15 @@ export function construirValor({ usuario = null, cargando = false, sesionExpirad
 
 export function AuthProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
-  // si hay tokens guardados, se arranca "cargando" hasta confirmarlos con el servidor (así F5 no te manda al login)
   const [cargando, setCargando] = useState(() => sesion.hayTokens());
   const [sesionExpirada, setSesionExpirada] = useState(false);
 
-  // Recuperar la sesión al abrir o recargar la página
   useEffect(() => {
     if (!sesion.hayTokens()) return undefined;
     let activo = true;
     obtenerSesion()
       .then((u) => activo && setUsuario(u))
       .catch((error) => {
-        // token rechazado por el servidor: se descarta. Si solo falló la conexión, se conserva para reintentar al recargar.
         if (error?.response) sesion.limpiar();
       })
       .finally(() => activo && setCargando(false));
@@ -51,7 +44,6 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
-  // Si la renovación del token falla en cualquier petición, la sesión se cierra sola
   useEffect(
     () =>
       sesion.alExpirar(() => {
@@ -79,7 +71,6 @@ export function AuthProvider({ children }) {
     setSesionExpirada(false);
   }, []);
 
-  /** Siempre crea un Cliente (lo decide el servidor). */
   const registrar = useCallback(async (datos) => {
     try {
       return { ok: true, usuario: await registrarCuenta(datos) };

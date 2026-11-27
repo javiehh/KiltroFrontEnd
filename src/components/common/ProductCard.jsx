@@ -4,7 +4,6 @@ import { formatoCLP } from '../../utils/format.js';
 import ProductMedia from './ProductMedia.jsx';
 import AddToCartButton from './AddToCartButton.jsx';
 
-/** Tarjeta de un producto: imagen, categoría, nombre, precio (con oferta si corresponde) y botón de agregar. */
 export default function ProductCard({ producto, categoria }) {
   const oferta = estaEnOferta(producto);
   return (

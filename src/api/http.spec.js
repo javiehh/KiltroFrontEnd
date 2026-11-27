@@ -2,14 +2,12 @@ import { AxiosError } from 'axios';
 import { crearCliente } from './http.js';
 import { sesion } from './sesion.js';
 
-/** Token con la forma de un JWT; solo importa el "exp" y que cada uno sea distinto. */
 function tokenFalso(segundosDeVida, marca = 'x') {
   const codificar = (objeto) => btoa(JSON.stringify(objeto)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
   const exp = Math.floor(Date.now() / 1000) + segundosDeVida;
   return `${codificar({ alg: 'HS256', marca })}.${codificar({ exp })}.firma`;
 }
 
-/** Respuesta simulada del servidor: 2xx resuelve; el resto rechaza como lo haría axios. */
 function responder(config, status, data = {}) {
   const respuesta = { data, status, statusText: '', headers: {}, config };
   if (status >= 200 && status < 300) return Promise.resolve(respuesta);
@@ -18,7 +16,6 @@ function responder(config, status, data = {}) {
 
 const autorizacion = (config) => config.headers.get('Authorization');
 
-/** Cliente real (con sus interceptores) pero sin red: el "servidor" lo simula la función manejador. */
 function clienteDePrueba(manejador, pedirTokens) {
   const cliente = crearCliente('http://servidor.test', pedirTokens);
   cliente.defaults.adapter = (config) => manejador(config);
@@ -59,14 +56,13 @@ describe('Cliente HTTP con interceptores', () => {
       sesion.guardar(nuevo, 'refresh-2');
       return nuevo;
     });
-    // el servidor solo acepta el token nuevo
     const manejador = jasmine.createSpy('servidor').and.callFake((config) =>
       autorizacion(config) === `Bearer ${nuevo}` ? responder(config, 200, { ok: true }) : responder(config, 401));
 
     const respuesta = await clienteDePrueba(manejador, pedir).get('/api/v1/usuarios');
 
     expect(respuesta.data.ok).toBe(true);
-    expect(manejador).toHaveBeenCalledTimes(2); // intento fallido + reintento
+    expect(manejador).toHaveBeenCalledTimes(2);
     expect(pedir).toHaveBeenCalledTimes(1);
     expect(sesion.obtenerRefresh()).toBe('refresh-2');
   });
@@ -122,13 +118,13 @@ describe('Cliente HTTP con interceptores', () => {
     const error = await clienteDePrueba(manejador, pedir).get('/api/v1/usuarios').catch((e) => e);
 
     expect(error.response.status).toBe(401);
-    expect(manejador).toHaveBeenCalledTimes(2); // un intento y UN reintento, nada más
+    expect(manejador).toHaveBeenCalledTimes(2);
     expect(pedir).toHaveBeenCalledTimes(1);
   });
 
   it('renueva el token ANTES de enviar si está por vencer (una compra no viaja con un token vencido)', async () => {
     const nuevo = tokenFalso(600, 'nuevo');
-    sesion.guardar(tokenFalso(10, 'por-vencer'), 'refresh-1'); // vence en 10 s: dentro del margen de 30 s
+    sesion.guardar(tokenFalso(10, 'por-vencer'), 'refresh-1');
     const pedir = jasmine.createSpy('pedirTokens').and.callFake(async () => {
       sesion.guardar(nuevo, 'refresh-2');
       return nuevo;
@@ -138,7 +134,7 @@ describe('Cliente HTTP con interceptores', () => {
     await clienteDePrueba(manejador, pedir).post('/api/v1/boletas', {});
 
     expect(pedir).toHaveBeenCalledTimes(1);
-    expect(manejador).toHaveBeenCalledTimes(1); // se envió una sola vez, ya con el token nuevo
+    expect(manejador).toHaveBeenCalledTimes(1);
     expect(autorizacion(manejador.calls.mostRecent().args[0])).toBe(`Bearer ${nuevo}`);
   });
 });

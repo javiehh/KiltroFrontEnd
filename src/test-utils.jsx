@@ -1,8 +1,3 @@
-/**
- * Utilidades compartidas por las pruebas (Jasmine + Karma).
- *  - reiniciarTodo(): deja el carrito y el almacenamiento del navegador como recién instalados
- *  - renderConApp(): dibuja un componente con Router (en memoria) y un usuario ya conectado, sin llamar a la API
- */
 import { render } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { AuthContext, construirValor } from './context/AuthContext.jsx';
@@ -14,10 +9,8 @@ export function reiniciarTodo() {
   vaciarCarrito();
 }
 
-/** RUN de las cuentas de ejemplo que carga el backend al iniciar (DataLoader de ms-usuarios) */
 export const RUN = { ADMIN: '111111111', VENDEDOR: '222222222', CLIENTE: '123456785' };
 
-/** Usuarios de prueba, con la misma forma que entrega la API ya adaptada (ver api/adaptadores.js). */
 export const USUARIOS_PRUEBA = {
   [RUN.ADMIN]: { id: 1, run: RUN.ADMIN, nombre: 'Javier', apellidos: 'Herrera', correo: 'javier@gmail.com', tipo: ROLES.ADMIN },
   [RUN.VENDEDOR]: { id: 2, run: RUN.VENDEDOR, nombre: 'Camila', apellidos: 'Soto', correo: 'camila@gmail.com', tipo: ROLES.VENDEDOR },
@@ -29,7 +22,6 @@ export const USUARIOS_PRUEBA = {
 
 const ICONO = { tipo: 'icono', icono: 'huellas', tile: '#D9A441' };
 
-/** Productos de prueba con la misma forma que entrega la API (ms-productos). */
 export const PRODUCTOS_PRUEBA = [
   { id: 1, codigo: 'PER-001', nombre: 'Alimento premium adulto 15kg', descripcion: 'Alimento seco.', precio: 34990, descuento: 15, oferta: true, stock: 24, stockCritico: 5, categoriaId: 1, categoriaNombre: 'Perros', media: ICONO },
   { id: 2, codigo: 'PER-002', nombre: 'Correa y collar de cuero', descripcion: 'Resistente.', precio: 12500, descuento: 0, oferta: false, stock: 15, stockCritico: 3, categoriaId: 1, categoriaNombre: 'Perros', media: ICONO },
@@ -42,7 +34,6 @@ export const CATEGORIAS_PRUEBA = [
   { id: 3, nombre: 'Aves', descripcion: 'Todo para aves', icono: 'huellas', tile: '#D9A441', cantidadProductos: 1 }
 ];
 
-/** ruta: texto o { pathname, state }. usuarioRun: RUN de uno de los usuarios de prueba. cargando: simula "verificando sesión". */
 export function renderConApp(ui, { ruta = '/', usuarioRun = null, cargando = false } = {}) {
   const usuario = usuarioRun ? USUARIOS_PRUEBA[usuarioRun] : null;
   return render(

@@ -7,7 +7,6 @@ import EmptyState from '../../components/common/EmptyState.jsx';
 import OrdersTable from '../../components/common/OrdersTable.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Historial de compras de un usuario (GET /boletas/usuario/{id}, solo ADMIN). */
 export default function UserHistoryPage() {
   const { id } = useParams();
   const consulta = useApi(() => Promise.all([obtenerUsuario(id), boletasDeUsuario(id)]), [id]);

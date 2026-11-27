@@ -1,6 +1,5 @@
 import { ICONOS } from '../../data/iconos.js';
 
-/** Muestra la foto del producto o, si no tiene, un ícono SVG sobre un fondo de color. */
 export default function ProductMedia({ producto, className = '' }) {
   const { media } = producto;
   if (media.tipo === 'foto') {

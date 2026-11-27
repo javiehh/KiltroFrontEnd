@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { agregarAlCarrito } from '../../data/carrito.js';
 import Button from './Button.jsx';
 
-/** Botón "Agregar": suma el producto al carrito y muestra "Agregado ✓" por un instante. */
 export default function AddToCartButton({ producto, cantidad = 1, className = '', size = 'sm', children }) {
   const [agregado, setAgregado] = useState(false);
 

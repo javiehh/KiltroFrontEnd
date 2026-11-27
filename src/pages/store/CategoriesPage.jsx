@@ -5,7 +5,6 @@ import PageHeader from '../../components/common/PageHeader.jsx';
 import ProductGrid from '../../components/common/ProductGrid.jsx';
 import { ICONOS } from '../../data/iconos.js';
 
-/** Vista de categorías: tarjetas para elegir una categoría y, debajo, los productos de la categoría elegida. */
 export default function CategoriesPage() {
   const { id } = useParams();
   const { productos, categorias, cargado, cargando, error, recargar } = useCatalogo();

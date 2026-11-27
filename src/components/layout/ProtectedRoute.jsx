@@ -20,12 +20,6 @@ function VerificandoSesion() {
   );
 }
 
-/**
- * Protege una ruta según un PERMISO (ver permisos.js), no según el nombre del rol.
- *  - mientras se confirma la sesión con el servidor muestra un indicador: así recargar con F5 no te manda al login;
- *  - sin sesión redirige al login (y recuerda a dónde querías ir);
- *  - con sesión pero sin el permiso, muestra "Acceso denegado".
- */
 export default function ProtectedRoute({ permiso, children }) {
   const { usuario, cargando, puede } = useAuth();
   const location = useLocation();

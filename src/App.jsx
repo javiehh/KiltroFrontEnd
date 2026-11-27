@@ -38,10 +38,8 @@ import UserHistoryPage from './pages/admin/UserHistoryPage.jsx';
 import ReportsPage from './pages/admin/ReportsPage.jsx';
 import ProfilePage from './pages/admin/ProfilePage.jsx';
 
-/** Envuelve una página con el permiso que exige (ver permisos.js). */
 const requiere = (permiso, pagina) => <ProtectedRoute permiso={permiso}>{pagina}</ProtectedRoute>;
 
-/** El Dashboard (reportes) es solo del Administrador; el Vendedor entra directo a las órdenes. */
 function InicioDelPanel() {
   const { puede } = useAuth();
   return puede(PERMISOS.REPORTES_VER) ? <DashboardPage /> : <Navigate to="ordenes" replace />;

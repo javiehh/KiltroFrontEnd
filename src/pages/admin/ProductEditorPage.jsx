@@ -10,7 +10,6 @@ import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Una sola página para "Nuevo producto" (sin :id) y "Editar producto" (con :id). */
 export default function ProductEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -31,7 +30,7 @@ export default function ProductEditorPage() {
       invalidarCatalogo();
       navigate('/admin/productos');
     } catch (e) {
-      setError(mensajeDeError(e)); // por ejemplo: 409 si el código ya existe
+      setError(mensajeDeError(e));
     } finally {
       setEnviando(false);
     }

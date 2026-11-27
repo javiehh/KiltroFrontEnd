@@ -8,7 +8,6 @@ import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Una sola página para "Nuevo usuario" (sin :id) y "Editar usuario" (con :id). */
 export default function UserEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,7 +27,7 @@ export default function UserEditorPage() {
       else await crearUsuario(datos);
       navigate('/admin/usuarios');
     } catch (e) {
-      setError(mensajeDeError(e)); // RUN o correo repetidos (409), RUN inválido (400), etc.
+      setError(mensajeDeError(e));
     } finally {
       setEnviando(false);
     }

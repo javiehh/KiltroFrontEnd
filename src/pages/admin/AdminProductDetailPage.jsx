@@ -14,7 +14,6 @@ import EmptyState from '../../components/common/EmptyState.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import ProductMedia from '../../components/common/ProductMedia.jsx';
 
-/** "Mostrar producto": ficha completa de un producto con acceso a editarlo. */
 export default function AdminProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();

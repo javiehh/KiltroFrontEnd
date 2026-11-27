@@ -1,4 +1,3 @@
-/** Selector de cantidad con botones − y +, limitado entre min y max. El padre controla el valor (props). */
 export default function QuantitySelector({ value, onChange, min = 1, max = 99, label = 'Cantidad' }) {
   const poner = (n) => onChange(Math.min(max, Math.max(min, n)));
   return (

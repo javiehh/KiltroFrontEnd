@@ -1,13 +1,8 @@
-/**
- * Traductores entre lo que habla la API y lo que ya usa la interfaz. Así los componentes no cambian:
- * siguen trabajando con usuario.tipo = 'Administrador' aunque el backend use rol = 'ADMIN'.
- */
 import { ROLES } from '../data/constantes.js';
 
 const ROL_A_TIPO = { ADMIN: ROLES.ADMIN, VENDEDOR: ROLES.VENDEDOR, CLIENTE: ROLES.CLIENTE };
 const TIPO_A_ROL = Object.fromEntries(Object.entries(ROL_A_TIPO).map(([rol, tipo]) => [tipo, rol]));
 
-/** API -> interfaz. Un rol desconocido se trata como Cliente (el de menos permisos). */
 export const usuarioDesdeApi = (u) => ({
   id: u.id,
   run: u.run,
@@ -23,7 +18,6 @@ export const usuarioDesdeApi = (u) => ({
 
 const fechaOpcional = (valor) => valor || null;
 
-/** Formulario de registro -> RegistroRequest (no lleva rol: el servidor siempre crea un Cliente). */
 export const registroAApi = (d) => ({
   run: d.run,
   nombre: d.nombre,
@@ -36,7 +30,6 @@ export const registroAApi = (d) => ({
   fechaNacimiento: fechaOpcional(d.fechaNacimiento)
 });
 
-/** Formulario de perfil -> PerfilRequest (sin RUN ni rol). La contraseña solo viaja si se escribió una nueva. */
 export const perfilAApi = (d) => {
   const cuerpo = {
     nombre: d.nombre,
@@ -51,17 +44,12 @@ export const perfilAApi = (d) => {
   return cuerpo;
 };
 
-/** Formulario del administrador -> UsuarioRequest (con rol). */
 export const usuarioAApi = (d) => ({
   ...perfilAApi(d),
   run: d.run,
   rol: TIPO_A_ROL[d.tipo]
 });
 
-/**
- * Formulario de producto -> ProductoRequest. La API recibe SOLO el porcentaje de descuento (0 = sin oferta),
- * no la casilla "oferta"; la imagen viaja como URL y el servidor decide si guarda una foto o un ícono.
- */
 export const productoAApi = (d) => ({
   codigo: d.codigo,
   nombre: d.nombre,
@@ -74,10 +62,6 @@ export const productoAApi = (d) => ({
   categoriaId: Number(d.categoriaId)
 });
 
-/**
- * Compra -> CompraRequest. Solo viajan productoId y cantidad de cada línea: el precio y el total los calcula el
- * backend, así nadie puede comprar a $1 modificando la petición.
- */
 export const compraAApi = ({ cliente, direccion, lineas }) => ({
   cliente: { nombre: cliente.nombre, apellidos: cliente.apellidos, correo: cliente.correo },
   direccion: {

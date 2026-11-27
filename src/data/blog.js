@@ -1,4 +1,3 @@
-// Artículos del blog (tomados del proyecto HTML original)
 export const BLOG = [
   {
     "id": 1,

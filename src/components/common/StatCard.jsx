@@ -1,4 +1,3 @@
-/** Tarjeta de cifra para el dashboard (ej: "Productos — 12"). `color` es una clase de fondo de Bootstrap. */
 export default function StatCard({ titulo, valor, detalle, icono, color = 'primary' }) {
   return (
     <div className={`card text-white bg-${color} h-100 border-0 shadow-sm`} data-testid="stat-card">

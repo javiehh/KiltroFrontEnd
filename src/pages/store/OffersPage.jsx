@@ -5,7 +5,6 @@ import ConEstado from '../../components/common/ConEstado.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 import ProductGrid from '../../components/common/ProductGrid.jsx';
 
-/** Usa el endpoint GET /productos/ofertas de ms-productos: el servidor decide qué productos tienen descuento. */
 export default function OffersPage() {
   const ofertas = useApi(listarOfertas);
   const { categorias } = useCatalogo();

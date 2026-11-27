@@ -9,7 +9,7 @@ import { ConConsulta } from '../../components/common/ConEstado.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
 export default function AdminCategoriesPage() {
-  const consulta = useApi(listarCategorias); // cada categoría trae su cantidadProductos
+  const consulta = useApi(listarCategorias);
   const [mensaje, setMensaje] = useState('');
 
   const eliminar = async (c) => {
@@ -21,7 +21,7 @@ export default function AdminCategoriesPage() {
       invalidarCatalogo();
       consulta.recargar();
     } catch (e) {
-      setMensaje(mensajeDeError(e)); // el servidor también lo impide (409) aunque la pantalla estuviera desactualizada
+      setMensaje(mensajeDeError(e));
     }
   };
 

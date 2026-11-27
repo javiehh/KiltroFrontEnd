@@ -7,7 +7,6 @@ import { useCatalogo } from '../../hooks/useCatalogo.js';
 import { formatoCLP } from '../../utils/format.js';
 import Logo from './Logo.jsx';
 
-/* Barra de navegación de la tienda */
 export default function Navbar() {
   const [busqueda, setBusqueda] = useState('');
   const navigate = useNavigate();

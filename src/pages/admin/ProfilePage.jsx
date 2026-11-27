@@ -3,7 +3,6 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import UserForm from '../../components/forms/UserForm.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Perfil: cada usuario del panel edita sus propios datos y su contraseña (no puede cambiar su RUN ni su rol). */
 export default function ProfilePage() {
   const { usuario, actualizarPerfil } = useAuth();
   const [guardado, setGuardado] = useState(false);
@@ -12,7 +11,7 @@ export default function ProfilePage() {
 
   const guardar = async (datos) => {
     setEnviando(true);
-    const resultado = await actualizarPerfil(datos); // el servidor valida, p. ej. que el correo no sea de otra cuenta
+    const resultado = await actualizarPerfil(datos);
     setEnviando(false);
     if (!resultado.ok) { setError(resultado.error); setGuardado(false); return; }
     setError('');

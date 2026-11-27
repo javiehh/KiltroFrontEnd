@@ -6,7 +6,6 @@ import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** "Mostrar usuario": datos de la cuenta, con acceso a editarla y a su historial de compras. */
 export default function UserDetailPage() {
   const { id } = useParams();
   const consulta = useApi(() => Promise.all([obtenerUsuario(id), boletasDeUsuario(id)]), [id]);

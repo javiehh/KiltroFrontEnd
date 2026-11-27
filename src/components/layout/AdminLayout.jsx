@@ -4,7 +4,6 @@ import { useAuth } from '../../context/AuthContext.jsx';
 import { PERMISOS } from '../../permisos.js';
 import Logo from './Logo.jsx';
 
-/** Opciones del menú lateral y el permiso que exige cada una (ver permisos.js: el Vendedor solo ve productos y órdenes). */
 export const MENU_ADMIN = [
   { ruta: '/admin', texto: 'Dashboard', icono: 'bi-speedometer2', permiso: PERMISOS.REPORTES_VER, fin: true },
   { ruta: '/admin/ordenes', texto: 'Órdenes', icono: 'bi-receipt', permiso: PERMISOS.ORDENES_VER },

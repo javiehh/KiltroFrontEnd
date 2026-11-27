@@ -27,7 +27,6 @@ const REGLAS = {
   indicaciones: [(v) => largoMaximo(v, 300)]
 };
 
-/** Si hay sesión, los datos del usuario se completan solos. */
 const valoresIniciales = (usuario) => ({
   nombre: usuario?.nombre ?? '', apellidos: usuario?.apellidos ?? '', correo: usuario?.correo ?? '',
   calle: usuario?.direccion ?? '', departamento: '', region: usuario?.region ?? '', comuna: usuario?.comuna ?? '', indicaciones: ''
@@ -46,7 +45,6 @@ export default function CheckoutPage() {
   }
 
   const pagar = async (v) => {
-    // revisión rápida para avisar antes de enviar; el servidor vuelve a comprobar el stock y es quien decide
     const sinStock = detalle
       .filter(({ producto, cantidad }) => cantidad > producto.stock)
       .map(({ producto }) => `No hay stock suficiente de "${producto.nombre}" (quedan ${producto.stock}).`);
@@ -55,19 +53,17 @@ export default function CheckoutPage() {
     setProblemas([]);
     setEnviando(true);
     try {
-      // solo viajan los datos del cliente y productoId + cantidad: el precio y el total los calcula el backend
       const orden = await comprar({
         cliente: { nombre: v.nombre.trim(), apellidos: v.apellidos.trim(), correo: v.correo.trim() },
         direccion: { calle: v.calle.trim(), departamento: v.departamento.trim(), region: v.region, comuna: v.comuna, indicaciones: v.indicaciones.trim() },
         lineas: detalle
       });
       vaciarCarrito();
-      invalidarCatalogo(); // el stock cambió
+      invalidarCatalogo();
       navigate(`/compra/exitosa/${orden.id}`, { state: { orden } });
     } catch (error) {
       const status = error.response?.status;
       if (!error.response || status === 409 || status === 503) {
-        // sin stock (409), servicio caído (503) o sin conexión: vista de compra fallida; el carrito se conserva
         invalidarCatalogo();
         navigate('/compra/error', { state: { motivo: mensajeDeError(error) } });
       } else {

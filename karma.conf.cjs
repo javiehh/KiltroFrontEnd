@@ -1,15 +1,8 @@
-/**
- * Configuración de Karma + Jasmine para probar componentes React.
- *  - webpack + babel-loader transpilan JSX y módulos ES para el navegador de pruebas
- *  - ChromeHeadless ejecuta las pruebas sin abrir ventana
- *  - Con --coverage se instrumenta el código (babel-plugin-istanbul) y se genera el informe en /coverage
- */
 const path = require('path');
 
 const withCoverage = process.argv.includes('--coverage');
 if (withCoverage) process.env.BABEL_ENV = 'coverage';
 
-// Si no hay Chrome del sistema, se puede indicar uno con CHROME_BIN=/ruta/al/chrome
 module.exports = function (config) {
   config.set({
     basePath: '',

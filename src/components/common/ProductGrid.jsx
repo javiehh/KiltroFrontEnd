@@ -1,10 +1,6 @@
 import ProductCard from './ProductCard.jsx';
 import EmptyState from './EmptyState.jsx';
 
-/**
- * Lista de productos en una grilla responsive de Bootstrap. Dibuja una tarjeta por cada producto recibido.
- * Recibe las categorías ya cargadas (para la etiqueta de cada tarjeta): así no pide datos por su cuenta.
- */
 export default function ProductGrid({ productos, categorias = [], mensajeVacio = 'No hay productos para mostrar.' }) {
   if (productos.length === 0) return <EmptyState mensaje={mensajeVacio} />;
   return (

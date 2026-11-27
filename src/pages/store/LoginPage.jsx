@@ -16,7 +16,6 @@ export default function LoginPage() {
     const resultado = await login(correo, password);
     setEnviando(false);
     if (!resultado.ok) { setError(resultado.error); return; }
-    // quien puede usar el panel (Administrador y Vendedor) entra directo a él; el Cliente vuelve a la tienda
     const destino = state?.from || (puede(resultado.usuario, PERMISOS.PANEL) ? '/admin' : '/');
     navigate(destino, { replace: true });
   };

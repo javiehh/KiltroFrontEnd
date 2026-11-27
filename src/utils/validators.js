@@ -1,9 +1,3 @@
-/**
- * Validadores reutilizables. Cada uno recibe el valor del campo y devuelve { valid, message }.
- * Se combinan en listas (ver validarValor) y los usa el hook useForm.
- */
-
-// Dominios de correo permitidos (definido por el negocio en las evaluaciones anteriores)
 export const DOMINIOS_PERMITIDOS = ['gmail.com'];
 
 export const esRequerido = (valor) => {
@@ -36,10 +30,8 @@ export const correoValido = (valor) => {
   return { valid: ok, message: ok ? '' : `Solo se aceptan correos ${DOMINIOS_PERMITIDOS.map((d) => '@' + d).join(', ')}.` };
 };
 
-/** Correo opcional: vacío es válido, pero si se escribe debe cumplir formato y dominio. */
 export const correoOpcional = (valor) => (String(valor).trim() === '' ? { valid: true, message: '' } : correoValido(valor));
 
-/** RUN chileno sin puntos ni guion (7 a 9 caracteres), verificado con el algoritmo de módulo 11. */
 export const runValido = (valorCrudo) => {
   const run = String(valorCrudo).trim().toUpperCase().replace(/[^0-9K]/g, '');
   if (run.length < 7 || run.length > 9) {
@@ -79,7 +71,6 @@ export const enteroEntre = (valor, min, max) => {
   return { valid: ok, message: ok ? '' : `Debe ser un número entero entre ${min} y ${max}.` };
 };
 
-/** Ejecuta una lista de reglas (valor, todosLosValores) => {valid,message} y devuelve el primer error ('' si todo OK). */
 export function validarValor(valor, reglas = [], valores = {}) {
   for (const regla of reglas) {
     const resultado = regla(valor, valores);

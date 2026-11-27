@@ -1,4 +1,3 @@
-// Regiones y comunas disponibles en los formularios de dirección
 export const REGIONES = [
   {
     "nombre": "Región Metropolitana de Santiago",

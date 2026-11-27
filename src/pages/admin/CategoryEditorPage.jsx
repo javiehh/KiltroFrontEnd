@@ -9,7 +9,6 @@ import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Una sola página para "Nueva categoría" y "Editar categoría". */
 export default function CategoryEditorPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,7 +24,6 @@ export default function CategoryEditorPage() {
     setEnviando(true);
     setError('');
     try {
-      // al crear, el servidor asigna el ícono y el color por defecto; al editar se conservan los que ya tenía
       if (existente) await actualizarCategoria(existente.id, { ...datos, icono: existente.icono, tile: existente.tile });
       else await crearCategoria(datos);
       invalidarCatalogo();

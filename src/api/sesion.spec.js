@@ -1,6 +1,5 @@
 import { sesion } from './sesion.js';
 
-/** Token con la forma de un JWT (encabezado.datos.firma); solo importa el "exp". */
 function tokenFalso(segundosDeVida) {
   const codificar = (objeto) => btoa(JSON.stringify(objeto)).replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
   const exp = Math.floor(Date.now() / 1000) + segundosDeVida;
@@ -24,9 +23,9 @@ describe('sesion (tokens)', () => {
   });
 
   it('estaPorVencer distingue un token vigente de uno por vencer o vencido', () => {
-    expect(sesion.estaPorVencer(tokenFalso(600))).toBe(false);  // vence en 10 minutos
-    expect(sesion.estaPorVencer(tokenFalso(10))).toBe(true);    // vence en 10 segundos (margen de 30)
-    expect(sesion.estaPorVencer(tokenFalso(-60))).toBe(true);   // ya venció
+    expect(sesion.estaPorVencer(tokenFalso(600))).toBe(false);
+    expect(sesion.estaPorVencer(tokenFalso(10))).toBe(true);
+    expect(sesion.estaPorVencer(tokenFalso(-60))).toBe(true);
   });
 
   it('un texto que no es un token no se considera por vencer', () => {

@@ -1,4 +1,3 @@
-/** Llamadas a ms-productos (puerto 8082): categorías. Cada una trae cantidadProductos. */
 import { apiProductos } from './http.js';
 
 const RUTA = '/api/v1/categorias';

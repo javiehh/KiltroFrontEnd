@@ -6,10 +6,6 @@ import FormField from '../common/FormField.jsx';
 
 const VACIO = { codigo: '', categoriaId: '', nombre: '', descripcion: '', precio: '', stock: '', stockCritico: '', oferta: false, descuento: '', imagenUrl: '' };
 
-/**
- * Formulario para crear o editar un producto. Las validaciones dan respuesta inmediata; el servidor vuelve a
- * validarlo todo (y es quien asegura, por ejemplo, que el código no se repita aunque dos personas creen a la vez).
- */
 export default function ProductForm({ inicial, idActual = null, onSubmit, onCancel, errorGeneral = '', enviando = false }) {
   const { categorias, productos } = useCatalogo();
   const reglas = {

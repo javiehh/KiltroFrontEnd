@@ -13,7 +13,7 @@ import ProductMedia from '../../components/common/ProductMedia.jsx';
 import QuantitySelector from '../../components/common/QuantitySelector.jsx';
 
 function DetalleProducto({ id }) {
-  const consulta = useApi(() => obtenerProducto(id), [id]); // GET /productos/{id}: el stock mostrado es el real
+  const consulta = useApi(() => obtenerProducto(id), [id]);
   const { productos, categorias } = useCatalogo();
   const [cantidad, setCantidad] = useState(1);
   const producto = consulta.datos;
@@ -67,7 +67,6 @@ function DetalleProducto({ id }) {
   );
 }
 
-/** La "key" reinicia el componente al pasar de un producto a otro (la cantidad elegida no se arrastra). */
 export default function ProductDetailPage() {
   const { id } = useParams();
   return <DetalleProducto key={id} id={id} />;

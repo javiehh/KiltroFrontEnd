@@ -1,8 +1,3 @@
-/**
- * Carrito de compras: se guarda en localStorage (como pide el Anexo) y notifica cambios
- * para que la interfaz (React) se actualice al instante.
- * Solo se guarda { id, cantidad }: el precio y el nombre se calculan siempre desde el catálogo.
- */
 import { precioFinal } from './productos.js';
 
 export const CARRITO_KEY = 'kiltro_react_carrito';
@@ -32,11 +27,9 @@ export const carritoStore = {
     suscriptores.add(fn);
     return () => suscriptores.delete(fn);
   },
-  /** Mismo arreglo mientras no haya cambios (requisito de useSyncExternalStore) */
   obtener: () => items
 };
 
-/** Agrega unidades; nunca deja la cantidad por encima del stock disponible. */
 export function agregarAlCarrito(id, cantidad = 1, stockMaximo = Infinity) {
   const existente = items.find((i) => i.id === id);
   const nueva = Math.min((existente ? existente.cantidad : 0) + cantidad, stockMaximo);
@@ -57,7 +50,6 @@ export function vaciarCarrito() {
   emitir();
 }
 
-/** Combina las líneas del carrito con los datos actuales del catálogo. */
 export function detalleCarrito(lineas, productos) {
   return lineas
     .map((linea) => {

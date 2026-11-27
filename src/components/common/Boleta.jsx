@@ -1,6 +1,5 @@
 import { formatoCLP, formatoFecha } from '../../utils/format.js';
 
-/** Detalle de una orden (boleta): datos del cliente, dirección de entrega, productos y total. Solo lectura. */
 export default function Boleta({ orden }) {
   const { cliente, direccion } = orden;
   return (

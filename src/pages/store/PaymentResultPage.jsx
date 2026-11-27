@@ -8,12 +8,6 @@ import Button from '../../components/common/Button.jsx';
 import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 
-/**
- * Resultado de la compra, en una sola página para las dos vistas:
- *  - exito: la boleta que devolvió el servidor (201). Llega por el estado de navegación; si se recargó la página y hay
- *    sesión, se vuelve a pedir al servidor (solo su dueño puede verla).
- *  - error: el motivo que informó el servidor (409 sin stock, 503 servicio caído...). El carrito se conserva.
- */
 export default function PaymentResultPage({ exito }) {
   const { id } = useParams();
   const { state } = useLocation();

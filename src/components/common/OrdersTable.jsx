@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom';
 import { COLOR_ESTADO, ETIQUETA_ESTADO } from '../../data/constantes.js';
 import { formatoCLP, formatoFecha } from '../../utils/format.js';
 
-/** Tabla de órdenes (boletas). `baseRuta` define a dónde lleva "Ver boleta" (ej: /admin/ordenes). */
 export default function OrdersTable({ ordenes, baseRuta = '/admin/ordenes' }) {
   if (ordenes.length === 0) return <p className="text-secondary">No hay órdenes para mostrar.</p>;
   return (

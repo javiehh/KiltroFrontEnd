@@ -23,7 +23,6 @@ const DESCRIPCIONES = {
 
 export default function DashboardPage() {
   const { usuario, puede } = useAuth();
-  // los totales de ventas los calcula el servidor (GET /reportes/resumen); el resto sale de las listas de productos y usuarios
   const consulta = useApi(() => Promise.all([obtenerResumenVentas(), listarProductos(), listarUsuarios()]));
 
   return (

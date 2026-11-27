@@ -13,7 +13,6 @@ import { Cargando } from '../../components/common/ConEstado.jsx';
 import EmptyState from '../../components/common/EmptyState.jsx';
 import PageHeader from '../../components/common/PageHeader.jsx';
 
-/** Boleta de una orden. Quien tiene el permiso de gestionar órdenes (Administrador) puede cambiar su estado. */
 export default function OrderDetailPage() {
   const { id } = useParams();
   const { puede } = useAuth();
@@ -34,12 +33,12 @@ export default function OrderDetailPage() {
     setAviso({ tipo: '', texto: '' });
     try {
       await cambiarEstado(orden.id, elegido);
-      if (elegido === ESTADOS_BOLETA.ANULADA) invalidarCatalogo(); // al anular, el servidor devuelve el stock
+      if (elegido === ESTADOS_BOLETA.ANULADA) invalidarCatalogo();
       setNuevoEstado('');
       setAviso({ tipo: 'success', texto: elegido === ESTADOS_BOLETA.ANULADA ? 'Orden anulada: el stock volvió al inventario.' : `Estado actualizado a ${ETIQUETA_ESTADO[elegido]}.` });
       consulta.recargar();
     } catch (e) {
-      setAviso({ tipo: 'danger', texto: mensajeDeError(e) }); // 409 si ya estaba anulada, 503 si ms-productos no responde
+      setAviso({ tipo: 'danger', texto: mensajeDeError(e) });
     } finally {
       setEnviando(false);
     }

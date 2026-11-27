@@ -8,7 +8,6 @@ const REGLAS = {
   password: [esRequerido, (v) => largoEntre(v, 4, 10)]
 };
 
-/** Formulario de inicio de sesión. `errorGeneral` es el mensaje que devuelve el sistema (ej: credenciales incorrectas). */
 export default function LoginForm({ onSubmit, errorGeneral = '', enviando = false }) {
   const form = useForm({ correo: '', password: '' }, REGLAS);
   return (

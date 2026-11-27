@@ -10,6 +10,6 @@ describe('Simulación de eventos (carrito)', () => {
     render(<AddToCartButton producto={PRODUCTOS_PRUEBA[1]} />);
     fireEvent.click(screen.getByRole('button', { name: 'Agregar' }));
     expect(carritoStore.obtener()).toEqual([{ id: 2, cantidad: 1 }]);
-    expect(screen.getByRole('button').textContent).toBe('Agregado ✓'); // el estado del botón cambió
+    expect(screen.getByRole('button').textContent).toBe('Agregado ✓');
   });
 });

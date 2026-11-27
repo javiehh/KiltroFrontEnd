@@ -7,13 +7,6 @@ import RegionComunaFields from './RegionComunaFields.jsx';
 
 const VACIO = { run: '', tipo: '', nombre: '', apellidos: '', correo: '', password: '', passwordConfirm: '', fechaNacimiento: '', region: '', comuna: '', direccion: '' };
 
-/**
- * Un solo formulario de usuario para cuatro situaciones (modo):
- *  - registro: el cliente crea su propia cuenta (confirma contraseña, no elige rol)
- *  - crear:    el administrador crea un usuario y le asigna rol
- *  - editar:   el administrador edita un usuario (RUN no editable; contraseña opcional)
- *  - perfil:   cada usuario edita sus propios datos (RUN y rol no editables)
- */
 export default function UserForm({ modo = 'registro', inicial, onSubmit, onCancel, errorGeneral = '', textoBoton, enviando = false }) {
   const edicion = modo === 'editar' || modo === 'perfil';
   const reglas = {
